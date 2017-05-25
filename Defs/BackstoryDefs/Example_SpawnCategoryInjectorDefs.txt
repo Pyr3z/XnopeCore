@@ -13,7 +13,20 @@
 	  <li>full_title_of_backstory_1</li>
 	  <li>full_title_of_backstory_2</li>
 	</injectToBackstories>
+	
+	<injectToCategories>
+	  <!-- Here, you can essentially 'copy' an existing spawn category to the new one. -->
+	  <li>Civil</li>
+	  <li>Trader</li>
+	  <li>Traveler</li>
+	  <li>Slave</li>
+	  <li>Raider</li>
+	  <li>Tribal</li>
+	</injectToCategories>
   </Xnope.Defs.SpawnCategoryInjectorDef>
+  
+  
+  
   
   
   <!-- Example from my Carnivale mod: -->
@@ -45,7 +58,7 @@
   </Xnope.Defs.SpawnCategoryInjectorDef>
   
   <!-- Now any faction pawn or pawn kind that is spawned with the category 'Carnivale', -->
-  <!-- their backstories have a chance to to be any of these vanilla backstories -->
+  <!-- their backstories have a chance to be any of these vanilla backstories, -->
   <!-- which previously did not contain the spawn category 'Carnivale'. -->
   
 </SpawnCategoryInjectorDefs>

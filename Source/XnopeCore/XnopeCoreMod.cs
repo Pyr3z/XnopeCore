@@ -1,6 +1,4 @@
-﻿using Harmony;
-using HugsLib;
-using System.Reflection;
+﻿using HugsLib;
 using Verse;
 using RimWorld;
 using Xnope.Defs;
@@ -35,11 +33,26 @@ namespace Xnope
                 {
                     foreach (var bs in (from b in BackstoryDatabase.allBackstories.Values
                                         where b.Title.Equals(targetBS)
+                                            && !b.spawnCategories.Contains(injector.newCategory)
+                                        select b))
+                    {
+                        if (bs.spawnCategories.Contains(injector.newCategory)) continue;
+                        bs.spawnCategories.Add(injector.newCategory);
+                        if (Prefs.DevMode)
+                            Log.Message("Added spawn category \'" + injector.newCategory + "\' to backstory \'" + bs.Title + "\'");
+                    }
+                }
+
+                foreach (var targetCat in injector.injectToCategories)
+                {
+                    foreach (var bs in (from b in BackstoryDatabase.allBackstories.Values
+                                        where b.spawnCategories.Contains(targetCat)
+                                            && !b.spawnCategories.Contains(injector.newCategory)
                                         select b))
                     {
                         bs.spawnCategories.Add(injector.newCategory);
                         if (Prefs.DevMode)
-                            Log.Message("Added spawn category \'" + injector.newCategory + "\' to backstory \'" + targetBS + "\'");
+                            Log.Message("Added spawn category \'" + injector.newCategory + "\' to backstory \'" + bs.Title + "\'");
                     }
                 }
             }

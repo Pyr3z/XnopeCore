@@ -7,6 +7,7 @@ namespace Xnope.Defs
     {
         public string newCategory;
         public List<string> injectToBackstories = new List<string>();
+        public List<string> injectToCategories = new List<string>();
 
         // Actually injected in XnopeCoreMod.DefsLoaded()
     }
