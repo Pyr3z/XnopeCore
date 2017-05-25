@@ -4,6 +4,7 @@ namespace Xnope
 {
     // Does this seriously not exist in the game's code,
     // yet CompColorable exists?
+    // I suppose you could just use colors in GraphicData
     public class CompProperties_Colorable : CompProperties
     {
 

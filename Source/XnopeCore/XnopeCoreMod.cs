@@ -23,11 +23,11 @@ namespace Xnope
 
         public override void DefsLoaded()
         {
-            InjectBackstoryData();
+            InjectSpawnCategories();
         }
 
 
-        private static void InjectBackstoryData()
+        private static void InjectSpawnCategories()
         {
             foreach (var injector in DefDatabase<SpawnCategoryInjectorDef>.AllDefs)
             {

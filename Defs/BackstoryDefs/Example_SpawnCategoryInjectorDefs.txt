@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<SpawnCategoryInjectorDefs>
+
+  
+  <!-- Use this format to inject custom spawn categories into existing backstories: -->
+  
+  <Xnope.Defs.SpawnCategoryInjectorDef>
+    <defName>SCI_unique_name</defName>
+    
+    <newCategory>newCategory</newCategory>
+	
+	<injectToBackstories>
+	  <li>full_title_of_backstory_1</li>
+	  <li>full_title_of_backstory_2</li>
+	</injectToBackstories>
+  </Xnope.Defs.SpawnCategoryInjectorDef>
+  
+  
+  <!-- Example from my Carnivale mod: -->
+  
+  <Xnope.Defs.SpawnCategoryInjectorDef>
+    <defName>SCI_Carnivale</defName>
+    
+    <newCategory>Carnivale</newCategory>
+	<injectToBackstories>
+	  <li>Actor</li>
+	  <li>Con artist</li>
+	  <li>Courtesan</li>
+	  <li>Escaped convict</li>
+	  <li>Musician</li>
+	  <li>Medieval doctor</li>
+	  <li>Medieval minstrel</li>
+	  <li>Bodyguard</li>
+	  <li>Caravaneer</li>
+	  <!-- childhood -->
+	  <li>Apocalypse survivor</li>
+	  <li>Caravan traveler</li>
+	  <li>Mute</li>
+	  <li>Refugee</li>
+	  <li>Child slave</li>
+	  <li>Circus performer</li>
+	  <li>Medieval thief</li>
+	  <li>Sickly child</li>
+	</injectToBackstories>
+  </Xnope.Defs.SpawnCategoryInjectorDef>
+  
+  <!-- Now any faction pawn or pawn kind that is spawned with the category 'Carnivale', -->
+  <!-- their backstories have a chance to to be any of these vanilla backstories -->
+  <!-- which previously did not contain the spawn category 'Carnivale'. -->
+  
+</SpawnCategoryInjectorDefs>

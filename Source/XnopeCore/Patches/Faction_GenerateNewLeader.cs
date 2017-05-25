@@ -54,5 +54,10 @@ namespace Xnope.Patches
             f.Name = f.Name.Replace(oldLeaderName, f.leader.NameStringShort);
         }
 
+        private static string GetAdjectiveForLeader(string leaderName, string adjectiveType)
+        {
+            // TODO
+            return "";
+        }
     }
 }

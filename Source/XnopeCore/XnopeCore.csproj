@@ -61,9 +61,9 @@
     <Compile Include="Defs\BackstoryDef.cs" />
     <Compile Include="Defs\SpawnCategoryInjectorDef.cs" />
     <Compile Include="Patches\FactionGenerator_GenerateFactionsIntoWorld.cs" />
-    <Compile Include="Patches\BackstoryDatabase_ReloadAllBackstories.cs" />
     <Compile Include="FactionExtension.cs" />
     <Compile Include="Patches\Faction_GenerateNewLeader.cs" />
+    <Compile Include="Patches\PawnBioAndNameGenerator_SetBackstoryInSlot.cs" />
     <Compile Include="XnopeCoreMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

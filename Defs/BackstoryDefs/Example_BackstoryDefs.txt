@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<BackstoryDefs>
+  
+  <!-- Temnplate: most possible values are represented here. -->
+  
+  <Xnope.Defs.BackstoryDef>
+    <defName>YourDefName</defName>
+	<slot>Childhood</slot><!-- choose Childhood or Adulthood -->
+	<title>Full title</title>
+	<titleShort>Title</titleShort>
+	<baseDescription>NAME is this person's name. HECAP is either 'He' or 'She', while HE is either 'he' or 'she'. Similarly, there is HIS and HISCAP. All of these words are replaced appropiate to the pawn with this backstory.</baseDescription>
+	
+	<bodyTypeGlobal>Hulk</bodyTypeGlobal>
+	<bodyTypeMale>Female</bodyTypeMale>
+	<bodyTypeFemale>Male</bodyTypeFemale>
+	<!-- There is also 'Thin', 'Fat', and 'Undefined'. -->
+	
+	<skillGains> <!-- degree value must be between -20 and 20 -->
+	  <li><defName>Construction</defName><degree>20</degree></li>
+	  <li><defName>Growing</defName><degree>-20</degree></li>
+	  <li><defName>Intellectual</defName><degree>1</degree></li>
+	  <li><defName>Mining</defName><degree>-1</degree></li>
+	  <li><defName>Shooting</defName><degree>2</degree></li>
+	  <li><defName>Melee</defName><degree>2</degree></li>
+	  <li><defName>Social</defName><degree>2</degree></li>
+	  <li><defName>Animals</defName><degree>2</degree></li>
+	  <li><defName>Cooking</defName><degree>2</degree></li>
+	  <li><defName>Medicine</defName><degree>2</degree></li>
+	  <li><defName>Artistic</defName><degree>2</degree></li>
+	  <li><defName>Crafting</defName><degree>2</degree></li>
+	</skillGains>
+	
+	<workAllows>
+	  <!-- The inverse of workDisables. Somewhat pointless.
+	  Only useful if you want to disable everything but a few specific work tags.-->
+	  <li>ManualDumb</li> <!-- Hauling + Cleaning -->
+	  <li>ManualSkilled</li> <!-- Artistic + Crafting -->
+	  <li>Violent</li>
+	  <li>Caring</li> <!-- i.e., Doctoring -->
+	  <li>Social</li>
+	  <li>Intellectual</li> <!-- i.e., Researching -->
+	  <li>Animals</li>
+	  <li>Artistic</li>
+	  <li>Crafting</li>
+	  <li>Cooking</li>
+	  <li>Firefighting</li>
+	  <li>Cleaning</li>
+	  <li>Hauling</li>
+	  <li>PlantWork</li>
+	  <li>Mining</li>
+	</workAllows>
+	
+	<workDisables>
+	  <!-- same work tags as valid above. -->
+	</workDisables>
+	
+	<requiredWorkTags>
+	  <!-- Put work tags that should be required for a pawn to have here. -->
+	  <!-- For instance, it wouldn't make sense if a Gardener pawn couldn't grow, -->
+	  <!-- so you would add: -->
+	  <li>PlantWork</li>
+	  <!-- etc -->
+	</requiredWorkTags>
+	
+	<forcedTraits>
+	  <li><defName>TooSmart</defName><degree>0</degree></li>
+	  <li><defName>Beauty</defName><degree>2</degree></li>
+	  <!-- see Traits_Singular.xml or Traits_Spectrum.xml in Core mod for all vanilla traits. -->
+	  <!-- Modded traits are absolutely supported. -->
+	</forcedTraits>
+	
+	<disallowedTraits>
+	  <li><defName>Ascetic</defName><degree>0</degree></li>
+	  <li><defName>DrugDesire</defName><degree>-1</degree></li>
+	</disallowedTraits>
+	
+	<spawnCategories>
+	  <!-->
+	  You can technically put anything here, but a custom PawnKindDef
+	  or FactionDef which uses that new category should exist, otherwise
+	  it's a meaningless category.
+	  <-->
+	  <li>Civil</li>
+	  <li>Tribal</li>
+	  <li>Slave</li>
+	  <li>Traveler</li>
+	  <li>Trader</li>
+	  <li>Raider</li>
+	  <li>MySpawnCategory</li>
+	</spawnCategories>
+	
+  </Xnope.Defs.BackstoryDef>
+  
+</BackstoryDefs>
