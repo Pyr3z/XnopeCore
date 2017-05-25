@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+	<name>XnopeCore</name>
+	<author>Xnope</author>
+	<targetVersion>0.17.1546</targetVersion>
+  <url>https://github.com/Xnope/rimworld-carnivale</url>
+	<description>Core mod for Xnope mods and anyone else who wants to use its functionality. Adds the ability add backstories with defs, adds extensions to factions (roaming, dynamically named), and more to come.</description>
+</ModMetaData>
