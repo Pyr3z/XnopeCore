@@ -4,6 +4,7 @@ using System.Reflection;
 using Verse;
 using RimWorld;
 using Xnope.Defs;
+using System.Linq;
 
 namespace Xnope
 {
@@ -12,19 +13,36 @@ namespace Xnope
     {
         public override string ModIdentifier { get { return "XnopeCore"; } }
 
-        protected override bool HarmonyAutoPatch { get { return false; } }
+        //protected override bool HarmonyAutoPatch { get { return false; } }
 
         static XnopeCoreMod()
         {
-            HarmonyInstance harmony = HarmonyInstance.Create("com.github.xnope.core");
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            // For some reason, ReloadAllBackstories() stopped being called
-            // every DoPlayLoad(). I have no idea why, it was working fine
-            // before. Thus, the following three lines are necessary.
-            BackstoryDatabase.Clear();
-            BackstoryDatabase.ReloadAllBackstories();
-            BackstoryDef.ReloadModdedBackstories();
+        }
+
+
+        public override void DefsLoaded()
+        {
+            InjectBackstoryData();
+        }
+
+
+        private static void InjectBackstoryData()
+        {
+            foreach (var injector in DefDatabase<SpawnCategoryInjectorDef>.AllDefs)
+            {
+                foreach (var targetBS in injector.injectToBackstories)
+                {
+                    foreach (var bs in (from b in BackstoryDatabase.allBackstories.Values
+                                        where b.Title.Equals(targetBS)
+                                        select b))
+                    {
+                        bs.spawnCategories.Add(injector.newCategory);
+                        if (Prefs.DevMode)
+                            Log.Message("Added spawn category \'" + injector.newCategory + "\' to backstory \'" + targetBS + "\'");
+                    }
+                }
+            }
         }
     }
 }
