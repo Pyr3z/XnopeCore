@@ -25,6 +25,8 @@ namespace Xnope.Defs
         public List<string> spawnCategories = new List<string>();
         public List<BackstoryDefListItem> forcedTraits = new List<BackstoryDefListItem>();
         public List<BackstoryDefListItem> disallowedTraits = new List<BackstoryDefListItem>();
+
+        public int multiplicity = 1;
         #endregion
 
         public static BackstoryDef Named(string defName)
@@ -42,14 +44,35 @@ namespace Xnope.Defs
 
         public override void ResolveReferences()
         {
+            if (multiplicity < 1)
+            {
+                Log.Warning("Config error in " + defName + ": multiplicity must be >= 1");
+            }
+
+            // TODO: This is fairly inefficient code, but it works.
+            for (int i = 0; i < multiplicity; i++)
+                InternalResolveReferences(i);
+
+            if (Prefs.DevMode)
+            {
+                if (multiplicity > 1)
+                    Log.Message("Added " + defName + " backstory with multiplicity " + multiplicity);
+                else
+                    Log.Message("Added " + defName + " backstory");
+            }
+        }
+
+
+        private bool InternalResolveReferences(int counter)
+        {
             base.ResolveReferences();
 
-            if (!this.addToDatabase) return;
+            if (!this.addToDatabase) return false;
 
-            if (BackstoryDatabase.allBackstories.ContainsKey(this.UniqueSaveKey()))
+            if (BackstoryDatabase.allBackstories.ContainsKey(this.UniqueSaveKey(counter)))
             {
                 Log.Warning(this.defName + " is duplicated. Skipping.");
-                return;
+                return false;
             }
 
             //if (BackstoryDatabase.allBackstories.Remove(defName)) { }
@@ -61,13 +84,13 @@ namespace Xnope.Defs
             else
             {
                 Log.Error(this.defName + " requires a title in XML file. Skipping.");
-                return;
+                return false;
             }
 
             if (spawnCategories.NullOrEmpty())
             {
                 Log.Error(this.defName + " requires a spawnCategory in XML file. Skipping.");
-                return;
+                return false;
             }
             else
                 b.spawnCategories = spawnCategories;
@@ -157,31 +180,25 @@ namespace Xnope.Defs
 
             b.ResolveReferences();
             b.PostLoad();
-            b.identifier = this.UniqueSaveKey();
+            b.identifier = this.UniqueSaveKey(counter);
 
-            bool flag = false;
-            foreach (var s in b.ConfigErrors(false))
+            if (b.ConfigErrors(true).Any())
             {
-                if (!flag)
-                {
-                    flag = true;
-                }
+                // Config errors, don't add
+                return false;
             }
-            if (!flag)
-            {
-                BackstoryDatabase.AddBackstory(b);
-                if (Prefs.DevMode)
-                    Log.Message("Added " + this.UniqueSaveKey() + " backstory");
-            }
+
+            BackstoryDatabase.AddBackstory(b);
+            return true;
         }
     }
 
     public static class BackstoryDefExt
     {
-        public static string UniqueSaveKey(this BackstoryDef def)
+        public static string UniqueSaveKey(this BackstoryDef def, int counter)
         {
-            if (def.defName.StartsWith("XnopeBS_")) return def.defName;
-            return "XnopeBS_" + def.defName;
+            if (def.defName.StartsWith("XnopeBS_")) return def.defName + counter;
+            return "XnopeBS_" + def.defName + counter;
         }
     }
 
