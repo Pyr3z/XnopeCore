@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<FactionDefs>
+
+  <!-- Usage: -->
+  
+  <FactionDef Name="ExampleRoamingDynamicFaction" Abstract="True">
+	
+	<!-- Normal FactionDef stuff goes here -->
+	
+    <modExtensions>
+	  <li Class="Xnope.FactionExtension">
+	    <isRoaming>true</isRoaming>
+		<dynamicNaming>true</dynamicNaming>
+	  </li>
+	</modExtensions>
+	
+	<!-- Normal FactionDef stuff goes here -->
+	
+  </FactionDef>
+  
+</FactionDefs>

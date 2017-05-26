@@ -12,7 +12,7 @@ namespace Xnope.Patches
         // hides roaming factions
         static void Prefix()
         {
-            HideRoamingFactions();
+            HideRoamingFactions(true);
 
         }
 
@@ -20,29 +20,19 @@ namespace Xnope.Patches
         // unhides roaming factions
         static void Postfix()
         {
-            UnhideRoamingFactions();
+            HideRoamingFactions(false);
 
         }
 
 
 
-        private static void HideRoamingFactions()
+        private static void HideRoamingFactions(bool hide)
         {
             foreach (FactionDef def in (from d in DefDatabase<FactionDef>.AllDefs
                                         where d.IsRoaming()
                                         select d))
             {
-                def.hidden = true;
-            }
-        }
-
-        private static void UnhideRoamingFactions()
-        {
-            foreach (FactionDef def in (from d in DefDatabase<FactionDef>.AllDefs
-                                        where d.IsRoaming()
-                                        select d))
-            {
-                def.hidden = false;
+                def.hidden = hide;
             }
         }
     }
