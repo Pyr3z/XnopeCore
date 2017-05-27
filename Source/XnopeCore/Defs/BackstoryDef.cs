@@ -49,11 +49,14 @@ namespace Xnope.Defs
                 Log.Warning("Config error in " + defName + ": multiplicity must be >= 1");
             }
 
+            bool flag= false;
+
             // TODO: This is fairly inefficient code, but it works.
             for (int i = 0; i < multiplicity; i++)
-                InternalResolveReferences(i);
+                if (InternalResolveReferences(i))
+                    flag = true;
 
-            if (Prefs.DevMode)
+            if (flag && Prefs.DevMode)
             {
                 if (multiplicity > 1)
                     Log.Message("Added " + defName + " backstory with multiplicity " + multiplicity);
@@ -161,7 +164,6 @@ namespace Xnope.Defs
                 {
                     b.forcedTraits.Add(new TraitEntry(TraitDef.Named(trait.defName), trait.degree));
                 }
-
             }
 
             if (disallowedTraits.Count > 0)
@@ -189,16 +191,44 @@ namespace Xnope.Defs
             }
 
             BackstoryDatabase.AddBackstory(b);
+
             return true;
         }
     }
 
-    public static class BackstoryDefExt
+    public static class BackstoryUtilities
     {
         public static string UniqueSaveKey(this BackstoryDef def, int counter)
         {
             if (def.defName.StartsWith("XnopeBS_")) return def.defName + counter;
             return "XnopeBS_" + def.defName + counter;
+        }
+
+        public static Backstory Clone(this Backstory b)
+        {
+            Backstory b2 = new Backstory();
+
+            b2.slot = b.slot;
+            b2.SetTitle(b.Title);
+            b2.SetTitleShort(b.TitleShort);
+            b2.baseDesc = b.baseDesc;
+            b2.skillGains = b.skillGains; // Not a deep copy
+            b2.workDisables = b.workDisables; 
+            b2.requiredWorkTags = b.requiredWorkTags;
+            b2.spawnCategories = b.spawnCategories; // Not a deep copy
+            b2.bodyTypeGlobal = b.bodyTypeGlobal;
+            b2.bodyTypeFemale = b.bodyTypeFemale;
+            b2.bodyTypeMale = b.bodyTypeMale;
+            b2.forcedTraits = b.forcedTraits; // Not a deep copy
+            b2.disallowedTraits = b.disallowedTraits; // Not a deep copy
+            b2.shuffleable = b.shuffleable;
+
+            b2.ResolveReferences();
+            b2.PostLoad();
+            int id = (int)ParseHelper.FromString(b.identifier.Last().ToString(), typeof(int));
+            b2.identifier = b.identifier + (id + 1);
+
+            return b2;
         }
     }
 

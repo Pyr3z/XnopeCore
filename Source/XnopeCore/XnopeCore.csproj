@@ -33,6 +33,7 @@
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\..\..\HugsLib\Assemblies\0Harmony.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\RimWorldWin_Data\Managed\Assembly-CSharp.dll</HintPath>
@@ -40,6 +41,7 @@
     </Reference>
     <Reference Include="HugsLib">
       <HintPath>..\..\..\HugsLib\Assemblies\HugsLib.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

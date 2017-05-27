@@ -36,7 +36,9 @@ namespace Xnope
                                             && !b.spawnCategories.Contains(injector.newCategory)
                                         select b))
                     {
-                        if (bs.spawnCategories.Contains(injector.newCategory)) continue;
+                        if (injector.ignoreAdulthoods && bs.slot == BackstorySlot.Adulthood) continue;
+                        if (injector.ignoreChildhoods && bs.slot == BackstorySlot.Childhood) continue;
+
                         bs.spawnCategories.Add(injector.newCategory);
                         if (Prefs.DevMode)
                             Log.Message("Added spawn category \'" + injector.newCategory + "\' to backstory \'" + bs.Title + "\'");
@@ -50,6 +52,9 @@ namespace Xnope
                                             && !b.spawnCategories.Contains(injector.newCategory)
                                         select b))
                     {
+                        if (injector.ignoreAdulthoods && bs.slot == BackstorySlot.Adulthood) continue;
+                        if (injector.ignoreChildhoods && bs.slot == BackstorySlot.Childhood) continue;
+
                         bs.spawnCategories.Add(injector.newCategory);
                         if (Prefs.DevMode)
                             Log.Message("Added spawn category \'" + injector.newCategory + "\' to backstory \'" + bs.Title + "\'");
