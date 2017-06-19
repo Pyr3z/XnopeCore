@@ -16,7 +16,7 @@ namespace Xnope.Patches
         {
             if ((from kvp in BackstoryDatabase.allBackstories
                   where kvp.Value.shuffleable
-                       && kvp.Value.spawnCategories.Contains(pawn.kindDef.backstoryCategory)
+                       && kvp.Value.spawnCategories.Contains(pawn.kindDef.backstoryCategory) // changed
                        && kvp.Value.slot == slot
                        && (slot != BackstorySlot.Adulthood || !kvp.Value.requiredWorkTags.OverlapsWithOnAnyWorkType(pawn.story.childhood.workDisables))
                   select kvp.Value).TryRandomElement(out backstory))

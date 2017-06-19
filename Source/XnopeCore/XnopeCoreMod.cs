@@ -49,6 +49,7 @@ namespace Xnope
                 {
                     foreach (var bs in (from b in BackstoryDatabase.allBackstories.Values
                                         where b.spawnCategories.Contains(targetCat)
+                                            && !b.identifier.StartsWith("XnopeBS")
                                             && !b.spawnCategories.Contains(injector.newCategory)
                                         select b))
                     {

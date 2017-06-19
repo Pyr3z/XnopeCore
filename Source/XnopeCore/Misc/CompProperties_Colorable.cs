@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using UnityEngine;
+using Verse;
 
 namespace Xnope
 {
@@ -7,6 +8,7 @@ namespace Xnope
     // I suppose you could just use colors in GraphicData
     public class CompProperties_Colorable : CompProperties
     {
+        Color color;
 
         public CompProperties_Colorable()
         {
