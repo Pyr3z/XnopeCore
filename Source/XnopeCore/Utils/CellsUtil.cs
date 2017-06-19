@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using Verse;
 
-namespace Xnope.Util
+namespace Xnope
 {
-    public static class Cells
+    public static class CellsUtil
     {
         public static IntVec3 Average(this IEnumerable<IntVec3> vecs)
         {
@@ -276,6 +276,12 @@ namespace Xnope.Util
 
         public static int CountMineableCellsTo(this IntVec3 from, IntVec3 to, Map map, bool consecutive = false)
         {
+            if (!from.InBounds(map) || !to.InBounds(map))
+            {
+                Log.Error("One or both cells are not within the map: " + from + ", " + to);
+                return 0;
+            }
+
             int numMineable = 0;
             int numMineableConsecutive = 0;
             foreach (var cell in from.CellsInLineTo(to))
@@ -301,6 +307,8 @@ namespace Xnope.Util
         {
             foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, false))
             {
+                if (!cel.InBounds(map)) continue;
+
                 var cover = cel.GetCover(map);
                 if (cover != null && cover.def.mineable)
                 {
@@ -334,9 +342,9 @@ namespace Xnope.Util
             return result;
         }
 
-        public static bool IsAroundTerrainOfTag(this IntVec3 spot, Map map, int radius, string tag)
+        public static bool IsAroundTerrainOfTag(this IntVec3 spot, Map map, int searchRadius, string tag)
         {
-            foreach (var cell in GenRadial.RadialCellsAround(spot, radius, true))
+            foreach (var cell in GenRadial.RadialCellsAround(spot, searchRadius, true))
             {
                 if (!cell.InBounds(map)) continue;
 
@@ -347,6 +355,23 @@ namespace Xnope.Util
             }
 
             return false;
+        }
+
+        public static IntVec3 NearestStandableCell(this IntVec3 from, Map map, int searchRadius)
+        {
+            if (!from.InBounds(map))
+            {
+                Log.Error("Cell out of bounds: " + from);
+                return IntVec3.Invalid;
+            }
+
+            foreach (var cell in GenRadial.RadialCellsAround(from, searchRadius, true))
+            {
+                if (cell.Standable(map))
+                    return cell;
+            }
+
+            return IntVec3.Invalid;
         }
 
         public static IntVec3 ToIntVec3(this Rot4 rot, byte shiftedBy = 0)
