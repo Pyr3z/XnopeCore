@@ -7,3 +7,8 @@ A core mod for RimWorld that adds general functionality for my mods, and for any
   * Roaming factions: they roam about in caravans, but do not have any settlements. Similar to a hidden faction, only you can track and maintain relations with them via the Factions tab or the Comms Console.
   * Dynamically-named factions: a faction can be named dynamically based on what its leader's name is. Must have a custom RulePackDef namer that includes the string 'LNAME' to be replaced by the generated leader's name. This currently works, however more extensive work will be done on this feature later.
 * And most importantly, the Defs folder of this mod contains example .txt files that thoroughly outline how to use this mod for creating purposes. Please remember that these .txt files must be renamed to .xml files if you want to edit them directly into a usable Def.
+
+* Utilities
+  * I love my utilities, but feel free to copy my pasta. Credit would be a nicety, but not necessary.
+  * CellsUtil: a bunch of helper functions for dealing with IntVec3 / "cells".
+  * Will add more generalised functions from my mod Carnivale once I get it to a more stable place.
