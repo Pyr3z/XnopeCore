@@ -4,3 +4,7 @@ C:\Steam\steamapps\common\RimWorld\Mods\CarnivaleA17\Source\XnopeCore\obj\Debug\
 C:\Steam\steamapps\common\RimWorld\Mods\XnopeCore\Assemblies\XnopeCore.dll
 C:\Steam\steamapps\common\RimWorld\Mods\XnopeCore\Source\XnopeCore\obj\Debug\XnopeCore.csprojResolveAssemblyReference.cache
 C:\Steam\steamapps\common\RimWorld\Mods\XnopeCore\Source\XnopeCore\obj\Debug\XnopeCore.dll
+C:\Users\levi\Desktop\Modding - Rimworld\XnopeCore\Assemblies\XnopeCore.dll
+C:\Users\levi\Desktop\Modding - Rimworld\XnopeCore\Source\XnopeCore\obj\Debug\XnopeCore.csprojResolveAssemblyReference.cache
+C:\Users\levi\Desktop\Modding - Rimworld\XnopeCore\Source\XnopeCore\obj\Debug\XnopeCore.dll
+C:\Users\levi\Desktop\Modding - Rimworld\XnopeCore\Assemblies\XnopeCore.XML

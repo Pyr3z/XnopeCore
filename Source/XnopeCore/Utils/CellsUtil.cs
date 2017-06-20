@@ -4,88 +4,133 @@ using Verse;
 
 namespace Xnope
 {
+    /// <summary>
+    /// Utilities for RimWorld 'cells'.
+    /// <para />
+    /// Cells are generally represented as IntVec3's (3-D vectors with integer dimensions),
+    /// or sometimes as LocalTargetInfo's (a struct that is castable to/from an IntVec3).
+    /// </summary>
     public static class CellsUtil
     {
-        public static IntVec3 Average(this IEnumerable<IntVec3> vecs)
+        /// <summary>
+        /// Averages an IEnumerable of cells, with an optional multiplicity function that
+        /// determines how much weight a specific kind of cell should have on the average.
+        /// </summary>
+        /// <param name="cells"></param>
+        /// <param name="multiplicityFactorFunc">If not null, the result of this function
+        /// is effectively the number of times the passed cell is counted in the average.</param>
+        /// <returns></returns>
+        public static IntVec3 Average(this IEnumerable<LocalTargetInfo> cells, Func<LocalTargetInfo, int> multiplicityFactorFunc = null)
         {
             int totalX = 0;
             int totalZ = 0;
             int count = 0;
 
-            foreach (IntVec3 vec in vecs)
+            int multiplicity = 1;
+
+            foreach (var cell in cells)
             {
-                totalX += vec.x;
-                totalZ += vec.z;
-                count++;
+                if (multiplicityFactorFunc != null)
+                {
+                    multiplicity = multiplicityFactorFunc(cell);
+                }
+
+                IntVec3 vec = cell.Cell;
+
+                totalX += vec.x * multiplicity;
+                totalZ += vec.z * multiplicity;
+                count += multiplicity;
             }
 
             return new IntVec3(totalX / count, 0, totalZ / count);
         }
 
-        public static IntVec3 Average(params IntVec3[] vecs)
+        /// <summary>
+        /// Averages the passed cells, with an optional multiplicity function that
+        /// determines how much weight a specific kind of cell should have on the average.
+        /// </summary>
+        /// <param name="multiplicityFactorFunc">If not null, the result of this function
+        /// is effectively the number of times the passed cell is counted in the average.</param>
+        /// <param name="cells"></param>
+        /// <returns></returns>
+        public static IntVec3 Average(Func<LocalTargetInfo, int> multiplicityFactorFunc = null, params LocalTargetInfo[] cells)
         {
-            return vecs.Average();
+            return cells.Average(multiplicityFactorFunc);
         }
 
+        /// <summary>
+        /// Yields the cells in a line from a to b.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="debug">If true, will print each cell in the line to the log window.</param>
+        /// <returns></returns>
         public static IEnumerable<IntVec3> CellsInLineTo(this IntVec3 a, IntVec3 b, bool debug = false)
         {
             // Holy shit tho. It works, it's efficient, and it took me sooo long to figure out.
-            if (!a.InBounds(Find.VisibleMap) || !b.InBounds(Find.VisibleMap))
+            if (Find.VisibleMap != null && (!a.InBounds(Find.VisibleMap) || !b.InBounds(Find.VisibleMap)))
             {
-                Log.Error("Cell out of map bounds. a=" + a + " b=" + b);
+                Log.Error("Cell out of map bounds while calculating a line. Calculation will continue, but you may expect further errors. a=" + a + " b=" + b);
             }
 
             if (debug)
-                Log.Warning("[Debug] (" + a.x + ", 0, " + a.z + ")");
+                Log.Message("[Debug] (" + a.x + ", 0, " + a.z + ")");
 
             yield return a;
-
-            int dx = b.x - a.x;
-            int dz = b.z - a.z;
 
             int x = a.x;
             int z = a.z;
 
-            int d;
-            int r;
+            int dx = b.x - x; // the change in x to reach b.x
+            int dz = b.z - z; // the change in z to reach b.z
 
-            int dxa = dx < 0 ? -dx : dx;
-            int dza = dz < 0 ? -dz : dz;
+            int dxa = dx < 0 ? -dx : dx; // absolute value of dx
+            int dza = dz < 0 ? -dz : dz; // absolute value of dz
 
+            int d; // how many distinct intermediate lines there should be between a and b
+            int r; // remainder: used to compensate for indivisible differentials
+
+            // avoid a value of d < 1:
             if (dxa > dza)
             {
+                // line relative to x+ direction is less than 45-degree angle
                 d = dxa / (dza + 1);
                 r = dxa % (dza + 1);
             }
             else if (dxa < dza)
             {
+                // line relative to x+ direction is greater than 45-degree angle
                 d = dza / (dxa + 1);
                 r = dza % (dxa + 1);
             }
             else
             {
+                // line relative to x+ direction is a 45-degree angle
                 d = dxa;
                 r = 0;
             }
 
+            // do calculations until we've reached b
             while (dx != 0 || dz != 0)
             {
-                // handle straight lines
+                // EZ-PZ straight lines :)
                 if (dx == 0 && dz != 0)
                 {
                     if (dz > 0)
                     {
+                        // go up
                         z++;
                         dz--;
                     }
                     else
                     {
+                        // go down
                         z--;
                         dz++;
                     }
 
                     if (debug)
-                        Log.Warning("[Debug] (" + x + ", 0, " + z + ")");
+                        Log.Message("[Debug] (" + x + ", 0, " + z + ")");
 
                     yield return new IntVec3(x, 0, z);
                 }
@@ -93,29 +138,33 @@ namespace Xnope
                 {
                     if (dx > 0)
                     {
+                        // go right
                         x++;
                         dx--;
                     }
                     else
                     {
+                        // go left
                         x--;
                         dx++;
                     }
 
                     if (debug)
-                        Log.Warning("[Debug] (" + x + ", 0, " + z + ")");
+                        Log.Message("[Debug] (" + x + ", 0, " + z + ")");
 
                     yield return new IntVec3(x, 0, z);
                 }
                 else
                 {
-                    // non-straight lines
+                    // non-straight lines : do intermediate lines
                     for (int i = 0; i < d; i++)
                     {
                         if (dx == -dz && dx != 0)
                         {
+                            // go diagonal (quadrants II & IV)
                             if (dx > dz)
                             {
+                                // right-down
                                 x++;
                                 z--;
                                 dx--;
@@ -123,6 +172,7 @@ namespace Xnope
                             }
                             else
                             {
+                                // left-up
                                 x--;
                                 z++;
                                 dx++;
@@ -133,19 +183,23 @@ namespace Xnope
                         {
                             if (dx > 0 || dza > dxa)
                             {
+                                // more dz to do than dx
                                 if (dz > 0)
                                 {
+                                    // up
                                     z++;
                                     dz--;
                                 }
                                 else
                                 {
+                                    // down
                                     z--;
                                     dz++;
                                 }
                             }
-                            else
+                            else // more dx to do than dz, and dx is negative
                             {
+                                // left
                                 x--;
                                 dx++;
                             }
@@ -154,27 +208,33 @@ namespace Xnope
                         {
                             if (dz > 0 || dxa > dza)
                             {
+                                // more dx to do than dz
                                 if (dx > 0)
                                 {
+                                    // right
                                     x++;
                                     dx--;
                                 }
                                 else
                                 {
+                                    // left
                                     x--;
                                     dx++;
                                 }
                             }
-                            else
+                            else // more dz to do than dx, and dz is negative
                             {
+                                // down
                                 z--;
                                 dz++;
                             }
                         }
                         else if (dx == dz && dx != 0)
                         {
+                            // do diagonal (quadrants I & III)
                             if (dx > 0)
                             {
+                                // right-up
                                 x++;
                                 z++;
                                 dx--;
@@ -182,48 +242,56 @@ namespace Xnope
                             }
                             else
                             {
+                                // left-down
                                 x--;
                                 z--;
                                 dx++;
                                 dz++;
                             }
                         }
-                        else // dx == dz && dx == 0
+                        else // dx == 0 && dz == 0
                         {
+                            // shouldn't do any more because we've reached b
                             break;
                         }
 
                         if (debug)
-                            Log.Warning("[Debug] (" + x + ", 0, " + z + ")");
+                            Log.Message("[Debug] (" + x + ", 0, " + z + ")");
 
                         yield return new IntVec3(x, 0, z);
-                    }
+                    } // end d for-loop
 
-                    // handle increment
+                    // increment next intermediate line
                     if (dx > dz && dz != 0)
                     {
                         if (dz > 0)
                         {
+                            // adjacent shift up
                             z++;
                             dz--;
                         }
                         else
                         {
+                            // adjacent shift down
                             z--;
                             dz++;
                         }
 
-                        // handle remainder
+                        // remainder compensation
                         if (r != 0)
                         {
+                            // if still some remainder, make it a diagonal line
+                            // instead of directly adjacent
                             if (dx > 0)
                             {
+                                // additional shift right
                                 x++;
                                 dx--;
                                 r--;
                             }
                             else if (dx < 0)
                             {
+                                // additional shift left
                                 x--;
                                 dx++;
                                 r--;
@@ -231,7 +299,7 @@ namespace Xnope
                         }
 
                         if (debug)
-                            Log.Warning("[Debug] (" + x + ", 0, " + z + ")");
+                            Log.Message("[Debug] (" + x + ", 0, " + z + ")");
 
                         yield return new IntVec3(x, 0, z);
                     }
@@ -239,26 +307,32 @@ namespace Xnope
                     {
                         if (dx > 0)
                         {
+                            // adjacent shift right
                             x++;
                             dx--;
                         }
                         else
                         {
+                            // adjacent shift left
                             x--;
                             dx++;
                         }
 
-                        // handle remainder
+                        // remainder compensation
                         if (r != 0)
                         {
+                            // if still some remainder, make it a diagonal line
+                            // instead of directly adjacent
                             if (dz > 0)
                             {
+                                // additional shift up
                                 z++;
                                 dz--;
                                 r--;
                             }
                             else if (dz < 0)
                             {
+                                // additional shift down
                                 z--;
                                 dz++;
                                 r--;
@@ -266,25 +340,64 @@ namespace Xnope
                         }
 
                         if (debug)
-                            Log.Warning("[Debug] (" + x + ", 0, " + z + ")");
+                            Log.Message("[Debug] (" + x + ", 0, " + z + ")");
 
                         yield return new IntVec3(x, 0, z);
                     }
                 }
             } // end while
+            // we did it
         }
 
-        public static int CountMineableCellsTo(this IntVec3 from, IntVec3 to, Map map, bool consecutive = false)
+        /// <summary>
+        /// Yields the edges of a rect, sans corners.
+        /// <para />
+        /// Order: South-East-North-West.
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <returns></returns>
+        public static IEnumerable<IntVec3> CornerlessEdgeCells(this CellRect rect)
         {
-            if (!from.InBounds(map) || !to.InBounds(map))
+            int x = rect.minX + 1;
+            int z = rect.minZ;
+            while (x < rect.maxX)
             {
-                Log.Error("One or both cells are not within the map: " + from + ", " + to);
+                yield return new IntVec3(x, 0, z);
+                x++;
+            }
+            for (z++; z < rect.maxZ; z++)
+            {
+                yield return new IntVec3(x, 0, z);
+            }
+            for (x--; x > rect.minX; x--)
+            {
+                yield return new IntVec3(x, 0, z);
+            }
+            for (z--; z > rect.minZ; z--)
+            {
+                yield return new IntVec3(x, 0, z);
+            }
+        }
+
+        /// <summary>
+        /// Counts the number of mineable cells between a and be.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="map"></param>
+        /// <param name="consecutive">If true, returns the highest number of consecutive mineable cells.</param>
+        /// <returns></returns>
+        public static int CountMineableCellsTo(this IntVec3 a, IntVec3 b, Map map, bool consecutive = false)
+        {
+            if (!a.InBounds(map) || !b.InBounds(map))
+            {
+                Log.Error("One or both cells are not within the map: " + a + ", " + b);
                 return 0;
             }
 
             int numMineable = 0;
             int numMineableConsecutive = 0;
-            foreach (var cell in from.CellsInLineTo(to))
+            foreach (var cell in a.CellsInLineTo(b))
             {
                 var obst = cell.GetCover(map);
                 if (obst != null && obst.def.mineable)
@@ -303,17 +416,26 @@ namespace Xnope
             return consecutive ? numMineableConsecutive : numMineable;
         }
 
-        public static float DistanceSquaredToNearestMineable(this IntVec3 cell, Map map, int searchRadius, out IntVec3 mineable)
+        /// <summary>
+        /// Returns the square distance between cell and the nearest mineable cell.
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="map"></param>
+        /// <param name="searchRadius"></param>
+        /// <param name="mineable">The closest mineable cell.</param>
+        /// <returns></returns>
+        public static float DistanceSquaredToNearestMineable(this LocalTargetInfo cell, Map map, int searchRadius, out LocalTargetInfo mineable)
         {
-            foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, false))
+            IntVec3 cellvec = cell.Cell;
+            foreach (var cel in GenRadial.RadialCellsAround(cellvec, searchRadius, true))
             {
                 if (!cel.InBounds(map)) continue;
 
                 var cover = cel.GetCover(map);
                 if (cover != null && cover.def.mineable)
                 {
-                    mineable = cel;
-                    return cell.DistanceToSquared(cel);
+                    mineable = cover;
+                    return cellvec.DistanceToSquared(cel);
                 }
             }
 
@@ -321,16 +443,27 @@ namespace Xnope
             return float.MaxValue;
         }
 
-        public static IntVec3 FurthestCellFrom(this CellRect rect, IntVec3 point, bool edgeCellsOnly = false, Predicate<IntVec3> validator = null)
+        /// <summary>
+        /// Finds the furthest cell in the rect from point.
+        /// <para />
+        /// If there is no validator, only edge cells are checked,
+        /// as logically only edge cells could ever be returned.
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <param name="point"></param>
+        /// <param name="validator"></param>
+        /// <returns></returns>
+        public static IntVec3 FurthestCellFrom(this CellRect rect, LocalTargetInfo point, Predicate<IntVec3> validator = null)
         {
             IntVec3 result = rect.CenterCell;
+            IntVec3 pointVec = point.Cell;
             float distanceSquared = 0f;
 
-            foreach (var cell in edgeCellsOnly ? rect.EdgeCells : rect.Cells)
+            foreach (var cell in validator == null ? rect.EdgeCells : rect.Cells)
             {
                 if (validator == null || validator(cell))
                 {
-                    float tempDistanceSqrd = cell.DistanceToSquared(point);
+                    float tempDistanceSqrd = cell.DistanceToSquared(pointVec);
                     if (tempDistanceSqrd > distanceSquared)
                     {
                         result = cell;
@@ -342,13 +475,24 @@ namespace Xnope
             return result;
         }
 
-        public static bool IsAroundTerrainOfTag(this IntVec3 spot, Map map, int searchRadius, string tag)
+        /// <summary>
+        /// Returns true if the cell is around any terrain with the given tag, in the given search radius.
+        /// <para />
+        /// Example terrain tags would be "Water" or "Road".
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="map"></param>
+        /// <param name="searchRadius"></param>
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        public static bool IsAroundTerrainOfTag(this LocalTargetInfo cell, Map map, int searchRadius, string tag)
         {
-            foreach (var cell in GenRadial.RadialCellsAround(spot, searchRadius, true))
+            IntVec3 vec = cell.Cell;
+            foreach (var cel in GenRadial.RadialCellsAround(vec, searchRadius, true))
             {
-                if (!cell.InBounds(map)) continue;
+                if (!cel.InBounds(map)) continue;
 
-                if (cell.GetTerrain(map).HasTag(tag))
+                if (cel.GetTerrain(map).HasTag(tag))
                 {
                     return true;
                 }
@@ -357,6 +501,13 @@ namespace Xnope
             return false;
         }
 
+        /// <summary>
+        /// Returns the nearest standable cell within the searchRadius, or IntVec3.Invalid if none exists.
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="map"></param>
+        /// <param name="searchRadius"></param>
+        /// <returns></returns>
         public static IntVec3 NearestStandableCell(this IntVec3 from, Map map, int searchRadius)
         {
             if (!from.InBounds(map))
@@ -374,6 +525,14 @@ namespace Xnope
             return IntVec3.Invalid;
         }
 
+        /// <summary>
+        /// Returns the IntVec3 vector equivalent of the given rotation, optionally shifted clock-wise.
+        /// <para />
+        /// Example result: Rot4.East -> (1,0,0) || Rot4.West -> (-1,0,0)
+        /// </summary>
+        /// <param name="rot"></param>
+        /// <param name="shiftedBy"></param>
+        /// <returns></returns>
         public static IntVec3 ToIntVec3(this Rot4 rot, byte shiftedBy = 0)
         {
             byte rotb = rot.AsByte;

@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>XnopeCore</name>
+    </assembly>
+    <members>
+        <member name="T:Xnope.CellsUtil">
+            <summary>
+            Utilities for RimWorld 'cells'.
+            <para />
+            Cells are generally represented as IntVec3's (3-D vectors with integer dimensions),
+            or sometimes as LocalTargetInfo's (a struct that is castable to/from an IntVec3).
+            </summary>
+        </member>
+        <member name="M:Xnope.CellsUtil.Average(System.Collections.Generic.IEnumerable{Verse.LocalTargetInfo},System.Func{Verse.LocalTargetInfo,System.Int32})">
+            <summary>
+            Averages an IEnumerable of cells, with an optional multiplicity function that
+            determines how much weight a specific kind of cell should have on the average.
+            </summary>
+            <param name="cells"></param>
+            <param name="multiplicityFactorFunc">If not null, the result of this function
+            is effectively the number of times the passed cell is counted in the average.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Xnope.CellsUtil.Average(System.Func{Verse.LocalTargetInfo,System.Int32},Verse.LocalTargetInfo[])">
+            <summary>
+            Averages the passed cells, with an optional multiplicity function that
+            determines how much weight a specific kind of cell should have on the average.
+            </summary>
+            <param name="multiplicityFactorFunc">If not null, the result of this function
+            is effectively the number of times the passed cell is counted in the average.</param>
+            <param name="cells"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xnope.CellsUtil.CellsInLineTo(Verse.IntVec3,Verse.IntVec3,System.Boolean)">
+            <summary>
+            Yields the cells in a line from a to b.
+            </summary>
+            <param name="a"></param>
+            <param name="b"></param>
+            <param name="debug">If true, will print each cell in the line to the log window.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Xnope.CellsUtil.CornerlessEdgeCells(Verse.CellRect)">
+            <summary>
+            Yields the edges of a rect, sans corners.
+            <para />
+            Order: South-East-North-West.
+            </summary>
+            <param name="rect"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xnope.CellsUtil.CountMineableCellsTo(Verse.IntVec3,Verse.IntVec3,Verse.Map,System.Boolean)">
+            <summary>
+            Counts the number of mineable cells between a and be.
+            </summary>
+            <param name="a"></param>
+            <param name="b"></param>
+            <param name="map"></param>
+            <param name="consecutive">If true, returns the highest number of consecutive mineable cells.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Xnope.CellsUtil.DistanceSquaredToNearestMineable(Verse.LocalTargetInfo,Verse.Map,System.Int32,Verse.LocalTargetInfo@)">
+            <summary>
+            Returns the square distance between cell and the nearest mineable cell.
+            </summary>
+            <param name="cell"></param>
+            <param name="map"></param>
+            <param name="searchRadius"></param>
+            <param name="mineable">The closest mineable cell.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Xnope.CellsUtil.FurthestCellFrom(Verse.CellRect,Verse.LocalTargetInfo,System.Predicate{Verse.IntVec3})">
+            <summary>
+            Finds the furthest cell in the rect from point.
+            <para />
+            If there is no validator, only edge cells are checked,
+            as logically only edge cells could ever be returned.
+            </summary>
+            <param name="rect"></param>
+            <param name="point"></param>
+            <param name="validator"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xnope.CellsUtil.IsAroundTerrainOfTag(Verse.LocalTargetInfo,Verse.Map,System.Int32,System.String)">
+            <summary>
+            Returns true if the cell is around any terrain with the given tag, in the given search radius.
+            <para />
+            Example terrain tags would be "Water" or "Road".
+            </summary>
+            <param name="cell"></param>
+            <param name="map"></param>
+            <param name="searchRadius"></param>
+            <param name="tag"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xnope.CellsUtil.NearestStandableCell(Verse.IntVec3,Verse.Map,System.Int32)">
+            <summary>
+            Returns the nearest standable cell within the searchRadius, or IntVec3.Invalid if none exists.
+            </summary>
+            <param name="from"></param>
+            <param name="map"></param>
+            <param name="searchRadius"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xnope.CellsUtil.ToIntVec3(Verse.Rot4,System.Byte)">
+            <summary>
+            Returns the IntVec3 vector equivalent of the given rotation, optionally shifted clock-wise.
+            <para />
+            Example result: Rot4.East -> (1,0,0) || Rot4.West -> (-1,0,0)
+            </summary>
+            <param name="rot"></param>
+            <param name="shiftedBy"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
