@@ -9,15 +9,25 @@
             Utilities for RimWorld 'cells'.
             <para />
             Cells are generally represented as IntVec3's (3-D vectors with integer dimensions),
-            or sometimes as LocalTargetInfo's (a struct that is castable to/from an IntVec3).
+            or sometimes as LocalTargetInfo's (a struct that is castable to/from an IntVec3 or Thing).
             </summary>
+        </member>
+        <member name="M:Xnope.CellsUtil.Average(System.Collections.Generic.IEnumerable{Verse.IntVec3},System.Func{Verse.IntVec3,System.Int32})">
+            <summary>
+            Averages an IEnumerable of cells, with an optional multiplicity function that
+            determines how much weight a specific kind of cell should have on the average.
+            </summary>
+            <param name="cells">IEnumerable of IntVec3</param>
+            <param name="multiplicityFactorFunc">If not null, the result of this function
+            is effectively the number of times the passed cell is counted in the average.</param>
+            <returns></returns>
         </member>
         <member name="M:Xnope.CellsUtil.Average(System.Collections.Generic.IEnumerable{Verse.LocalTargetInfo},System.Func{Verse.LocalTargetInfo,System.Int32})">
             <summary>
             Averages an IEnumerable of cells, with an optional multiplicity function that
             determines how much weight a specific kind of cell should have on the average.
             </summary>
-            <param name="cells"></param>
+            <param name="cells">IEnumerable of LocalTargetInfo</param>
             <param name="multiplicityFactorFunc">If not null, the result of this function
             is effectively the number of times the passed cell is counted in the average.</param>
             <returns></returns>
@@ -60,7 +70,7 @@
             <param name="consecutive">If true, returns the highest number of consecutive mineable cells.</param>
             <returns></returns>
         </member>
-        <member name="M:Xnope.CellsUtil.DistanceSquaredToNearestMineable(Verse.LocalTargetInfo,Verse.Map,System.Int32,Verse.LocalTargetInfo@)">
+        <member name="M:Xnope.CellsUtil.DistanceSquaredToNearestMineable(Verse.IntVec3,Verse.Map,System.Int32,Verse.IntVec3@)">
             <summary>
             Returns the square distance between cell and the nearest mineable cell.
             </summary>
@@ -70,7 +80,20 @@
             <param name="mineable">The closest mineable cell.</param>
             <returns></returns>
         </member>
-        <member name="M:Xnope.CellsUtil.FurthestCellFrom(Verse.CellRect,Verse.LocalTargetInfo,System.Predicate{Verse.IntVec3})">
+        <member name="M:Xnope.CellsUtil.DistanceSquaredToNearestMineable(Verse.LocalTargetInfo,Verse.Map,System.Int32,Verse.LocalTargetInfo@)">
+            <summary>
+            Returns the square distance between cell and the nearest mineable cell.
+            <para />
+            The mineable out parameter is assigned a LocalTargetInfo which wraps the Thing of the cell,
+            not merely its IntVec3.
+            </summary>
+            <param name="cell"></param>
+            <param name="map"></param>
+            <param name="searchRadius"></param>
+            <param name="mineable">The closest mineable cell, with a Thing instead of an IntVec3.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Xnope.CellsUtil.FurthestCellFrom(Verse.CellRect,Verse.LocalTargetInfo,System.Boolean,System.Predicate{Verse.IntVec3})">
             <summary>
             Finds the furthest cell in the rect from point.
             <para />
@@ -79,7 +102,20 @@
             </summary>
             <param name="rect"></param>
             <param name="point"></param>
+            <param name="edgeCellsOnly">Forced to true if validator is null. Science, b*tch.</param>
             <param name="validator"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xnope.CellsUtil.IsAroundTerrainOfTag(Verse.IntVec3,Verse.Map,System.Int32,System.String)">
+            <summary>
+            Returns true if the cell is around any terrain with the given tag, in the given search radius.
+            <para />
+            Example terrain tags would be "Water" or "Road".
+            </summary>
+            <param name="cell"></param>
+            <param name="map"></param>
+            <param name="searchRadius"></param>
+            <param name="tag"></param>
             <returns></returns>
         </member>
         <member name="M:Xnope.CellsUtil.IsAroundTerrainOfTag(Verse.LocalTargetInfo,Verse.Map,System.Int32,System.String)">
@@ -110,6 +146,14 @@
             Example result: Rot4.East -> (1,0,0) || Rot4.West -> (-1,0,0)
             </summary>
             <param name="rot"></param>
+            <param name="shiftedBy"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xnope.CellsUtil.ToIntVec3(System.Byte,System.Byte)">
+            <summary>
+            Returns the IntVec3 vector equivalent of the given rotation, optionally shifted clock-wise.
+            </summary>
+            <param name="rotb"></param>
             <param name="shiftedBy"></param>
             <returns></returns>
         </member>

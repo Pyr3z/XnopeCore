@@ -8,7 +8,7 @@ namespace Xnope
     /// Utilities for RimWorld 'cells'.
     /// <para />
     /// Cells are generally represented as IntVec3's (3-D vectors with integer dimensions),
-    /// or sometimes as LocalTargetInfo's (a struct that is castable to/from an IntVec3).
+    /// or sometimes as LocalTargetInfo's (a struct that is castable to/from an IntVec3 or Thing).
     /// </summary>
     public static class CellsUtil
     {
@@ -16,7 +16,38 @@ namespace Xnope
         /// Averages an IEnumerable of cells, with an optional multiplicity function that
         /// determines how much weight a specific kind of cell should have on the average.
         /// </summary>
-        /// <param name="cells"></param>
+        /// <param name="cells">IEnumerable of IntVec3</param>
+        /// <param name="multiplicityFactorFunc">If not null, the result of this function
+        /// is effectively the number of times the passed cell is counted in the average.</param>
+        /// <returns></returns>
+        public static IntVec3 Average(this IEnumerable<IntVec3> cells, Func<IntVec3, int> multiplicityFactorFunc = null)
+        {
+            int totalX = 0;
+            int totalZ = 0;
+            int count = 0;
+
+            int multiplicity = 1;
+
+            foreach (var cell in cells)
+            {
+                if (multiplicityFactorFunc != null)
+                {
+                    multiplicity = multiplicityFactorFunc(cell);
+                }
+
+                totalX += cell.x * multiplicity;
+                totalZ += cell.z * multiplicity;
+                count += multiplicity;
+            }
+
+            return new IntVec3(totalX / count, 0, totalZ / count);
+        }
+
+        /// <summary>
+        /// Averages an IEnumerable of cells, with an optional multiplicity function that
+        /// determines how much weight a specific kind of cell should have on the average.
+        /// </summary>
+        /// <param name="cells">IEnumerable of LocalTargetInfo</param>
         /// <param name="multiplicityFactorFunc">If not null, the result of this function
         /// is effectively the number of times the passed cell is counted in the average.</param>
         /// <returns></returns>
@@ -424,6 +455,35 @@ namespace Xnope
         /// <param name="searchRadius"></param>
         /// <param name="mineable">The closest mineable cell.</param>
         /// <returns></returns>
+        public static float DistanceSquaredToNearestMineable(this IntVec3 cell, Map map, int searchRadius, out IntVec3 mineable)
+        {
+            foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
+            {
+                if (!cel.InBounds(map)) continue;
+
+                var cover = cel.GetCover(map);
+                if (cover != null && cover.def.mineable)
+                {
+                    mineable = cel;
+                    return cell.DistanceToSquared(cel);
+                }
+            }
+
+            mineable = IntVec3.Invalid;
+            return float.MaxValue;
+        }
+
+        /// <summary>
+        /// Returns the square distance between cell and the nearest mineable cell.
+        /// <para />
+        /// The mineable out parameter is assigned a LocalTargetInfo which wraps the Thing of the cell,
+        /// not merely its IntVec3.
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="map"></param>
+        /// <param name="searchRadius"></param>
+        /// <param name="mineable">The closest mineable cell, with a Thing instead of an IntVec3.</param>
+        /// <returns></returns>
         public static float DistanceSquaredToNearestMineable(this LocalTargetInfo cell, Map map, int searchRadius, out LocalTargetInfo mineable)
         {
             IntVec3 cellvec = cell.Cell;
@@ -451,15 +511,18 @@ namespace Xnope
         /// </summary>
         /// <param name="rect"></param>
         /// <param name="point"></param>
+        /// <param name="edgeCellsOnly">Forced to true if validator is null. Science, b*tch.</param>
         /// <param name="validator"></param>
         /// <returns></returns>
-        public static IntVec3 FurthestCellFrom(this CellRect rect, LocalTargetInfo point, Predicate<IntVec3> validator = null)
+        public static IntVec3 FurthestCellFrom(this CellRect rect, LocalTargetInfo point, bool edgeCellsOnly = true, Predicate<IntVec3> validator = null)
         {
             IntVec3 result = rect.CenterCell;
             IntVec3 pointVec = point.Cell;
             float distanceSquared = 0f;
 
-            foreach (var cell in validator == null ? rect.EdgeCells : rect.Cells)
+            if (validator == null && !edgeCellsOnly) edgeCellsOnly = true;
+
+            foreach (var cell in edgeCellsOnly ? rect.EdgeCells : rect.Cells)
             {
                 if (validator == null || validator(cell))
                 {
@@ -473,6 +536,31 @@ namespace Xnope
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Returns true if the cell is around any terrain with the given tag, in the given search radius.
+        /// <para />
+        /// Example terrain tags would be "Water" or "Road".
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="map"></param>
+        /// <param name="searchRadius"></param>
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        public static bool IsAroundTerrainOfTag(this IntVec3 cell, Map map, int searchRadius, string tag)
+        {
+            foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
+            {
+                if (!cel.InBounds(map)) continue;
+
+                if (cel.GetTerrain(map).HasTag(tag))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -535,7 +623,17 @@ namespace Xnope
         /// <returns></returns>
         public static IntVec3 ToIntVec3(this Rot4 rot, byte shiftedBy = 0)
         {
-            byte rotb = rot.AsByte;
+            return rot.AsByte.ToIntVec3(shiftedBy);
+        }
+
+        /// <summary>
+        /// Returns the IntVec3 vector equivalent of the given rotation, optionally shifted clock-wise.
+        /// </summary>
+        /// <param name="rotb"></param>
+        /// <param name="shiftedBy"></param>
+        /// <returns></returns>
+        public static IntVec3 ToIntVec3(this byte rotb, byte shiftedBy = 0)
+        {
             rotb += shiftedBy;
             rotb %= 4;
 
