@@ -157,5 +157,22 @@
             <param name="shiftedBy"></param>
             <returns></returns>
         </member>
+        <member name="M:Xnope.CellsUtil.TryFindNearestRoadEdgeCell(Verse.IntVec3,Verse.Map,Verse.IntVec3@)">
+            <summary>
+            If there are road cells on the edge of map, this will return the nearest one.
+            </summary>
+            <param name="cell"></param>
+            <param name="map"></param>
+            <param name="roadCell">Will be IntVec3.Invalid if return is false.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Xnope.CellsUtil.TryFindNearestRoadEdgeCells(Verse.IntVec3,Verse.Map)">
+            <summary>
+            If there are road cells on the edge of the map, this returns the nearest collection of them.
+            </summary>
+            <param name="cell"></param>
+            <param name="map"></param>
+            <returns></returns>
+        </member>
     </members>
 </doc>

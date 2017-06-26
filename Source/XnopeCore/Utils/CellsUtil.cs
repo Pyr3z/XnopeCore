@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Verse;
 
 namespace Xnope
@@ -656,5 +657,66 @@ namespace Xnope
                     return IntVec3.Invalid;
             }
         }
+
+        /// <summary>
+        /// If there are road cells on the edge of map, this will return the nearest one.
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="map"></param>
+        /// <param name="roadCell">Will be IntVec3.Invalid if return is false.</param>
+        /// <returns></returns>
+        public static bool TryFindNearestRoadEdgeCell(this IntVec3 cell, Map map, out IntVec3 roadCell)
+        {
+            var roadEdgeTiles = map.roadInfo.roadEdgeTiles;
+
+            if (!roadEdgeTiles.Any())
+            {
+                roadCell = IntVec3.Invalid;
+                return false;
+            }
+
+            var dist = float.MaxValue;
+            var tempCell = IntVec3.Invalid;
+
+            foreach (var rcell in roadEdgeTiles)
+            {
+                var tempDist = cell.DistanceToSquared(rcell);
+
+                if (tempDist < dist)
+                {
+                    dist = tempDist;
+                    tempCell = rcell;
+                }
+            }
+
+            roadCell = tempCell;
+
+            return tempCell.IsValid;
+        }
+
+        /// <summary>
+        /// If there are road cells on the edge of the map, this returns the nearest collection of them.
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="map"></param>
+        /// <returns></returns>
+        public static IEnumerable<IntVec3> TryFindNearestRoadEdgeCells(this IntVec3 cell, Map map)
+        {
+            IntVec3 initialRoadCell;
+            if (!TryFindNearestRoadEdgeCell(cell, map, out initialRoadCell))
+            {
+                yield break;
+            }
+
+            var roadEdgeCells = map.roadInfo.roadEdgeTiles;
+
+            // just yield the edge cells around the initial nearest road cell found
+            foreach (var rcell in GenRadial.RadialCellsAround(initialRoadCell, 3, true)
+                                  .Where(c => roadEdgeCells.Contains(c)))
+            {
+                yield return rcell;
+            }
+        }
+
     }
 }
