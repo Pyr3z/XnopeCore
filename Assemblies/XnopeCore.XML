@@ -139,6 +139,14 @@
             <param name="searchRadius"></param>
             <returns></returns>
         </member>
+        <member name="M:Xnope.CellsUtil.RotationFacing(Verse.IntVec3,Verse.IntVec3)">
+            <summary>
+            Returns the cardinal direction facing 'to', from the perspective of 'from'.
+            </summary>
+            <param name="from"></param>
+            <param name="to"></param>
+            <returns></returns>
+        </member>
         <member name="M:Xnope.CellsUtil.ToIntVec3(Verse.Rot4,System.Byte)">
             <summary>
             Returns the IntVec3 vector equivalent of the given rotation, optionally shifted clock-wise.

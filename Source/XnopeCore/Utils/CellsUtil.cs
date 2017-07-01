@@ -615,6 +615,43 @@ namespace Xnope
         }
 
         /// <summary>
+        /// Returns the cardinal direction facing 'to', from the perspective of 'from'.
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
+        public static Rot4 RotationFacing(this IntVec3 from, IntVec3 to)
+        {
+            var fxa = from.x < 0 ? -from.x : from.x;
+            var fza = from.z < 0 ? -from.z : from.z;
+            var txa = to.x < 0 ? -to.x : to.x;
+            var tza = to.z < 0 ? -to.z : to.z;
+
+            if ((txa - fxa) >= (tza - fza))
+            {
+                if (to.x <= from.x)
+                {
+                    return Rot4.West;
+                }
+                else
+                {
+                    return Rot4.East;
+                }
+            }
+            else
+            {
+                if (to.z <= from.z)
+                {
+                    return Rot4.South;
+                }
+                else
+                {
+                    return Rot4.North;
+                }
+            }
+        }
+
+        /// <summary>
         /// Returns the IntVec3 vector equivalent of the given rotation, optionally shifted clock-wise.
         /// <para />
         /// Example result: Rot4.East -> (1,0,0) || Rot4.West -> (-1,0,0)

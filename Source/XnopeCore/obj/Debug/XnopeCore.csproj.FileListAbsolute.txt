@@ -7,3 +7,4 @@ C:\Users\levi\Desktop\Modding - Rimworld\XnopeCore\Assemblies\XnopeCore.dll
 C:\Users\levi\Desktop\Modding - Rimworld\XnopeCore\Source\XnopeCore\obj\Debug\XnopeCore.dll
 C:\Users\levi\Desktop\Modding - Rimworld\XnopeCore\Assemblies\XnopeCore.XML
 C:\Steam\steamapps\common\RimWorld\Mods\XnopeCore\Assemblies\XnopeCore.XML
+C:\Steam\steamapps\common\RimWorld\Mods\XnopeCore\Source\XnopeCore\obj\Debug\XnopeCore.csprojResolveAssemblyReference.cache
