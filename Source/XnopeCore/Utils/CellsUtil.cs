@@ -622,33 +622,73 @@ namespace Xnope
         /// <returns></returns>
         public static Rot4 RotationFacing(this IntVec3 from, IntVec3 to)
         {
-            var fxa = from.x < 0 ? -from.x : from.x;
-            var fza = from.z < 0 ? -from.z : from.z;
-            var txa = to.x < 0 ? -to.x : to.x;
-            var tza = to.z < 0 ? -to.z : to.z;
+            var dir = to - from;
 
-            if ((txa - fxa) >= (tza - fza))
+            if (dir.x == 0)
             {
-                if (to.x <= from.x)
+                return dir.z < 0 ? Rot4.South : Rot4.North;
+            }
+
+            if (dir.z == 0)
+            {
+                return dir.x < 0 ? Rot4.West : Rot4.East;
+            }
+
+            if (dir.x > 0)
+            {
+                if (dir.z > 0)
                 {
-                    return Rot4.West;
+                    // Quadrant I
+                    if (dir.x > dir.z)
+                    {
+                        return Rot4.East;
+                    }
+                    else
+                    {
+                        return Rot4.North;
+                    }
                 }
                 else
                 {
-                    return Rot4.East;
+                    // Quadrant IV
+                    if (dir.x > -dir.z)
+                    {
+                        return Rot4.East;
+                    }
+                    else
+                    {
+                        return Rot4.South;
+                    }
                 }
             }
             else
             {
-                if (to.z <= from.z)
+                if (dir.z > 0)
                 {
-                    return Rot4.South;
+                    // Quadrant II
+                    if (-dir.x > dir.z)
+                    {
+                        return Rot4.West;
+                    }
+                    else
+                    {
+                        return Rot4.North;
+                    }
                 }
                 else
                 {
-                    return Rot4.North;
+                    // Quadrant III
+                    if (dir.x < dir.z)
+                    {
+                        return Rot4.West;
+                    }
+                    else
+                    {
+                        return Rot4.South;
+                    }
                 }
             }
+
         }
 
         /// <summary>
