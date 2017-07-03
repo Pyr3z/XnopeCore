@@ -191,7 +191,27 @@ namespace Xnope
                     // non-straight lines : do intermediate lines
                     for (int i = 0; i < d; i++)
                     {
-                        if (dx == -dz && dx != 0)
+                        if (dx == dz && dx != 0)
+                        {
+                            // do diagonal (quadrants I & III)
+                            if (dx > 0)
+                            {
+                                // right-up
+                                x++;
+                                z++;
+                                dx--;
+                                dz--;
+                            }
+                            else
+                            {
+                                // left-down
+                                x--;
+                                z--;
+                                dx++;
+                                dz++;
+                            }
+                        }
+                        else if (dx == -dz && dx != 0)
                         {
                             // go diagonal (quadrants II & IV)
                             if (dx > dz)
@@ -258,26 +278,6 @@ namespace Xnope
                             {
                                 // down
                                 z--;
-                                dz++;
-                            }
-                        }
-                        else if (dx == dz && dx != 0)
-                        {
-                            // do diagonal (quadrants I & III)
-                            if (dx > 0)
-                            {
-                                // right-up
-                                x++;
-                                z++;
-                                dx--;
-                                dz--;
-                            }
-                            else
-                            {
-                                // left-down
-                                x--;
-                                z--;
-                                dx++;
                                 dz++;
                             }
                         }
