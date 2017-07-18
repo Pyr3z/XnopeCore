@@ -77,6 +77,11 @@ namespace Xnope
             return new IntVec3(totalX / count, 0, totalZ / count);
         }
 
+        public static IntVec3 Average(Func<IntVec3, int> multiplicityFactorFunc = null, params IntVec3[] cells)
+        {
+            return cells.Average(multiplicityFactorFunc);
+        }
+
         /// <summary>
         /// Averages the passed cells, with an optional multiplicity function that
         /// determines how much weight a specific kind of cell should have on the average.
@@ -756,6 +761,33 @@ namespace Xnope
                     Log.Error("Error when converting Rot4 to IntVec3. Expect more errors.");
                     return IntVec3.Invalid;
             }
+        }
+
+        public static bool TryFindNearestRoadCell(this IntVec3 cell, Map map, int searchRadius, out IntVec3 roadCell)
+        {
+            if (!map.roadInfo.roadEdgeTiles.Any())
+            {
+                roadCell = IntVec3.Invalid;
+                return false;
+            }
+
+            var dist = float.MaxValue;
+            var tempCell = IntVec3.Invalid;
+
+            foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
+            {
+                var tempDist = cell.DistanceToSquared(cel);
+
+                if (tempDist < dist)
+                {
+                    dist = tempDist;
+                    tempCell = cel;
+                }
+            }
+
+            roadCell = tempCell;
+
+            return tempCell.IsValid;
         }
 
         /// <summary>

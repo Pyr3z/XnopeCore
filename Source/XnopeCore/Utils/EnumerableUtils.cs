@@ -15,7 +15,7 @@ namespace Xnope
 
             if (lowerBound < 0 || upperBound < 0 || lowerBound > length - 1 || upperBound > length - 1 || lowerBound > length)
             {
-                Log.Warning("[XnopeCore] Tried to limit an enumerable between " + lowerBound + " and " + upperBound + ". Returning original enumerable.");
+                Log.Warning("[XnopeCore] Tried to limit an enumerable between " + lowerBound + " and " + upperBound + ", with a max length of " + length + ". Returning original enumerable.");
                 foreach (var e in enumerable)
                 {
                     yield return e;
