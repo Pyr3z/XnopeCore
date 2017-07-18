@@ -70,6 +70,15 @@
             <param name="consecutive">If true, returns the highest number of consecutive mineable cells.</param>
             <returns></returns>
         </member>
+        <member name="M:Xnope.CellsUtil.DistanceSquaredToNearestMineable(Verse.IntVec3,Verse.Map,System.Int32)">
+            <summary>
+            Returns the square distance between cell and the nearest mineabl cell.
+            </summary>
+            <param name="cell"></param>
+            <param name="map"></param>
+            <param name="searchRadius"></param>
+            <returns></returns>
+        </member>
         <member name="M:Xnope.CellsUtil.DistanceSquaredToNearestMineable(Verse.IntVec3,Verse.Map,System.Int32,Verse.IntVec3@)">
             <summary>
             Returns the square distance between cell and the nearest mineable cell.
@@ -180,6 +189,20 @@
             </summary>
             <param name="cell"></param>
             <param name="map"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Xnope.EnumerableUtils">
+            <summary>
+            Various utilities concerning IEnumerables.
+            </summary>
+        </member>
+        <member name="M:Xnope.EnumerableUtils.LimitTo``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
+            <summary>
+            Limits the number of elements in the IEnumerable to the integer specified.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="enumerable"></param>
+            <param name="numElements"></param>
             <returns></returns>
         </member>
     </members>

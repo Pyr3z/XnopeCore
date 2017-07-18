@@ -66,6 +66,7 @@
     <Compile Include="Patches\Faction_GenerateNewLeader.cs" />
     <Compile Include="Patches\PawnBioAndNameGenerator_SetBackstoryInSlot.cs" />
     <Compile Include="Utils\CellsUtil.cs" />
+    <Compile Include="Utils\EnumerableUtils.cs" />
     <Compile Include="XnopeCoreMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

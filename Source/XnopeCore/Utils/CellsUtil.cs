@@ -449,6 +449,29 @@ namespace Xnope
         }
 
         /// <summary>
+        /// Returns the square distance between cell and the nearest mineabl cell.
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="map"></param>
+        /// <param name="searchRadius"></param>
+        /// <returns></returns>
+        public static float DistanceSquaredToNearestMineable(this IntVec3 cell, Map map, int searchRadius)
+        {
+            foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
+            {
+                if (!cel.InBounds(map)) continue;
+
+                var cover = cel.GetCover(map);
+                if (cover != null && cover.def.mineable)
+                {
+                    return cell.DistanceToSquared(cel);
+                }
+            }
+
+            return float.MaxValue;
+        }
+
+        /// <summary>
         /// Returns the square distance between cell and the nearest mineable cell.
         /// </summary>
         /// <param name="cell"></param>
