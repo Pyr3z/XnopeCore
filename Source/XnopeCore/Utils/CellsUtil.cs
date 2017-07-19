@@ -41,7 +41,7 @@ namespace Xnope
                 count += multiplicity;
             }
 
-            return new IntVec3(totalX / count, 0, totalZ / count);
+            return count == 0 ? IntVec3.Invalid : new IntVec3(totalX / count, 0, totalZ / count);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Xnope
                 count += multiplicity;
             }
 
-            return new IntVec3(totalX / count, 0, totalZ / count);
+            return count == 0 ? IntVec3.Invalid : new IntVec3(totalX / count, 0, totalZ / count);
         }
 
         public static IntVec3 Average(Func<IntVec3, int> multiplicityFactorFunc = null, params IntVec3[] cells)
