@@ -776,6 +776,8 @@ namespace Xnope
 
             foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
             {
+                if (!cel.InBounds(map)) continue;
+
                 if (cel.GetTerrain(map).HasTag("Road"))
                 {
                     var tempDist = cell.DistanceToSquared(cel);
