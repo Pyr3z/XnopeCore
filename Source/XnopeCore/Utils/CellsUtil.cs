@@ -776,12 +776,15 @@ namespace Xnope
 
             foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
             {
-                var tempDist = cell.DistanceToSquared(cel);
-
-                if (tempDist < dist)
+                if (cel.GetTerrain(map).HasTag("Road"))
                 {
-                    dist = tempDist;
-                    tempCell = cel;
+                    var tempDist = cell.DistanceToSquared(cel);
+
+                    if (tempDist < dist)
+                    {
+                        dist = tempDist;
+                        tempCell = cel;
+                    }
                 }
             }
 
