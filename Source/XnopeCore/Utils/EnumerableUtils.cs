@@ -13,13 +13,28 @@ namespace Xnope
         {
             int length = enumerable.Count();
 
-            if (lowerBound < 0 || upperBound < 0 || lowerBound > length - 1 || upperBound > length - 1 || lowerBound > length)
+            if (lowerBound < 0)
             {
-                Log.Warning("[XnopeCore] Tried to limit an enumerable between " + lowerBound + " and " + upperBound + ", with a max length of " + length + ". Returning original enumerable.");
-                foreach (var e in enumerable)
-                {
-                    yield return e;
-                }
+                Log.Warning("[XnopeCore] Tried to limit an enumerable with a lowerBound of " + lowerBound + ". Setting it to 0.");
+                lowerBound = 0;
+            }
+
+            if (upperBound < 0)
+            {
+                Log.Warning("[XnopeCore] Tried to limit an enumerable with an upperBound of " + upperBound + ". Setting it to 0.");
+                upperBound = 0;
+            }
+
+            if (upperBound > length - 1)
+            {
+                Log.Warning("[XnopeCore] Tried to limit an enumerable with an upperBound of " + upperBound + ". Setting it to" + (length - 1) + ".");
+                upperBound = length - 1;
+            }
+
+            if (lowerBound > length - 1)
+            {
+                Log.Warning("[XnopeCore] Tried to limit an enumerable with a lowerBound of " + lowerBound + ". Setting it to" + (length - 1) + ".");
+                lowerBound = length - 1;
             }
 
             if (lowerBound > upperBound)
@@ -33,12 +48,13 @@ namespace Xnope
             var enu = enumerable.GetEnumerator();
 
             int i = 0;
-            while (i++ < upperBound && enu.MoveNext())
+            while (i <= upperBound && enu.MoveNext())
             {
-                if (i > lowerBound)
+                if (i >= lowerBound)
                 {
                     yield return enu.Current;
                 }
+                i++;
             }
 
         }
@@ -67,11 +83,11 @@ namespace Xnope
             }
         }
 
-        public static IEnumerable<T> RandomGroup<T>(this IEnumerable<T> enumerable, int groupCount)
+        public static IEnumerable<T> RandomConsecutiveGroup<T>(this IEnumerable<T> enumerable, int groupCount)
         {
             int length = enumerable.Count();
 
-            if (groupCount < 0 || groupCount > length)
+            if (groupCount < 1 || groupCount > length)
             {
                 Log.Warning("[XnopeCore] Tried to get a random group in an enumerable with groupCount out of bounds. Returning the original.");
                 foreach (var e in enumerable)
@@ -85,13 +101,13 @@ namespace Xnope
 
             int upperBound = length - groupCount;
 
-            int rand = Rand.RangeInclusive(0, upperBound);
+            int start = Rand.RangeInclusive(0, upperBound);
 
             int i = 0;
             int j = 0;
             while (enu.MoveNext())
             {
-                if (i++ >= rand)
+                if (i++ >= start)
                 {
                     if (j++ == groupCount)
                     {

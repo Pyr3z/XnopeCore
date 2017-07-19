@@ -41,7 +41,7 @@ namespace Xnope
 
                         bs.spawnCategories.Add(injector.newCategory);
                         if (Prefs.DevMode)
-                            Log.Message("Added spawn category \'" + injector.newCategory + "\' to backstory \'" + bs.Title + "\'");
+                            Log.Message("[XnopeCore] Added spawn category \'" + injector.newCategory + "\' to backstory \'" + bs.Title + "\'");
                     }
                 }
 
@@ -58,7 +58,7 @@ namespace Xnope
 
                         bs.spawnCategories.Add(injector.newCategory);
                         if (Prefs.DevMode)
-                            Log.Message("Added spawn category \'" + injector.newCategory + "\' to backstory \'" + bs.Title + "\'");
+                            Log.Message("[XnopeCore] Added spawn category \'" + injector.newCategory + "\' to backstory \'" + bs.Title + "\'");
                     }
                 }
             }
