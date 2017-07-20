@@ -44,11 +44,11 @@
         </member>
         <member name="M:Xnope.CellsUtil.CellsInLineTo(Verse.IntVec3,Verse.IntVec3,System.Boolean)">
             <summary>
-            Yields the cells in a line from a to b.
+            HOLY SHIT WHY DID NOBODY TELL ME ABOUT Verse.GenSight?!? Yields the cells in a line from a to b.
             </summary>
             <param name="a"></param>
             <param name="b"></param>
-            <param name="debug">If true, will print each cell in the line to the log window.</param>
+            <param name="useFuckedUpVersion">If true, will use the fucked up version of the calculation. (My version.)</param>
             <returns></returns>
         </member>
         <member name="M:Xnope.CellsUtil.CornerlessEdgeCells(Verse.CellRect)">
@@ -70,7 +70,7 @@
             <param name="consecutive">If true, returns the highest number of consecutive mineable cells.</param>
             <returns></returns>
         </member>
-        <member name="M:Xnope.CellsUtil.DistanceSquaredToNearestMineable(Verse.IntVec3,Verse.Map,System.Int32)">
+        <member name="M:Xnope.CellsUtil.DistanceSquaredToNearestMineable(Verse.IntVec3,Verse.Map,System.Single)">
             <summary>
             Returns the square distance between cell and the nearest mineabl cell.
             </summary>
@@ -79,7 +79,7 @@
             <param name="searchRadius"></param>
             <returns></returns>
         </member>
-        <member name="M:Xnope.CellsUtil.DistanceSquaredToNearestMineable(Verse.IntVec3,Verse.Map,System.Int32,Verse.IntVec3@)">
+        <member name="M:Xnope.CellsUtil.DistanceSquaredToNearestMineable(Verse.IntVec3,Verse.Map,System.Single,Verse.IntVec3@)">
             <summary>
             Returns the square distance between cell and the nearest mineable cell.
             </summary>
@@ -89,7 +89,7 @@
             <param name="mineable">The closest mineable cell.</param>
             <returns></returns>
         </member>
-        <member name="M:Xnope.CellsUtil.DistanceSquaredToNearestMineable(Verse.LocalTargetInfo,Verse.Map,System.Int32,Verse.LocalTargetInfo@)">
+        <member name="M:Xnope.CellsUtil.DistanceSquaredToNearestMineable(Verse.LocalTargetInfo,Verse.Map,System.Single,Verse.LocalTargetInfo@)">
             <summary>
             Returns the square distance between cell and the nearest mineable cell.
             <para />
@@ -115,7 +115,7 @@
             <param name="validator"></param>
             <returns></returns>
         </member>
-        <member name="M:Xnope.CellsUtil.IsAroundTerrainOfTag(Verse.IntVec3,Verse.Map,System.Int32,System.String)">
+        <member name="M:Xnope.CellsUtil.IsAroundTerrainOfTag(Verse.IntVec3,Verse.Map,System.Single,System.String)">
             <summary>
             Returns true if the cell is around any terrain with the given tag, in the given search radius.
             <para />
@@ -127,7 +127,7 @@
             <param name="tag"></param>
             <returns></returns>
         </member>
-        <member name="M:Xnope.CellsUtil.IsAroundTerrainOfTag(Verse.LocalTargetInfo,Verse.Map,System.Int32,System.String)">
+        <member name="M:Xnope.CellsUtil.IsAroundTerrainOfTag(Verse.LocalTargetInfo,Verse.Map,System.Single,System.String)">
             <summary>
             Returns true if the cell is around any terrain with the given tag, in the given search radius.
             <para />
@@ -139,7 +139,7 @@
             <param name="tag"></param>
             <returns></returns>
         </member>
-        <member name="M:Xnope.CellsUtil.NearestStandableCell(Verse.IntVec3,Verse.Map,System.Int32)">
+        <member name="M:Xnope.CellsUtil.NearestStandableCell(Verse.IntVec3,Verse.Map,System.Single)">
             <summary>
             Returns the nearest standable cell within the searchRadius, or IntVec3.Invalid if none exists.
             </summary>

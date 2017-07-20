@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace Xnope
 {
+    #pragma warning disable CS1591
     [StaticConstructorOnStartup]
     public class XnopeCoreMod : ModBase
     {
@@ -19,6 +20,7 @@ namespace Xnope
         }
 
 
+        
         public override void DefsLoaded()
         {
             InjectSpawnCategories();
@@ -64,4 +66,5 @@ namespace Xnope
             }
         }
     }
+    #pragma warning restore CS1591
 }

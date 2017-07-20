@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 
 namespace Xnope
@@ -96,33 +97,88 @@ namespace Xnope
         }
 
         /// <summary>
-        /// Yields the cells in a line from a to b.
+        /// HOLY SHIT WHY DID NOBODY TELL ME ABOUT Verse.GenSight?!? Yields the cells in a line from a to b.
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
-        /// <param name="debug">If true, will print each cell in the line to the log window.</param>
+        /// <param name="useFuckedUpVersion">If true, will use the fucked up version of the calculation. (My version.)</param>
         /// <returns></returns>
-        public static IEnumerable<IntVec3> CellsInLineTo(this IntVec3 a, IntVec3 b, bool debug = false)
+        public static IEnumerable<IntVec3> CellsInLineTo(this IntVec3 a, IntVec3 b, bool useFuckedUpVersion = false)
         {
-            // Holy shit tho. It works, it's efficient, and it took me sooo long to figure out.
             if (Find.VisibleMap != null && (!a.InBounds(Find.VisibleMap) || !b.InBounds(Find.VisibleMap)))
             {
                 Log.Error("Cell out of map bounds while calculating a line. Calculation will continue, but you may expect further errors. a=" + a + " b=" + b);
             }
 
-            if (debug)
-                Log.Message("[Debug] (" + a.x + ", 0, " + a.z + ")");
+            if (!useFuckedUpVersion)
+            {
+                // Fuck me. I hate Tynan and his genius bullshit.
+                // Copyright Verse.GenSight.PointsOnLineOfSight(). Fuck.
+                bool sideOnEqual;
+                if (a.x == b.x)
+                {
+                    sideOnEqual = (a.z < b.z);
+                }
+                else
+                {
+                    sideOnEqual = (a.x < b.x);
+                }
+
+                int dx = Mathf.Abs(b.x - a.x);
+                int dz = Mathf.Abs(b.z - a.z);
+                int x = a.x;
+                int z = a.z;
+                int i = 1 + dx + dz;
+                int x_inc = (b.x <= a.x) ? -1 : 1;
+                int z_inc = (b.z <= a.z) ? -1 : 1;
+                int deviation = dx - dz;
+                dx *= 2; // Who the fuck knows why he did this.
+                dz *= 2;
+
+                IntVec3 cell = default(IntVec3);
+                while (i > 1)
+                {
+                    cell.x = x;
+                    cell.z = z;
+                    yield /* fucking */ return /* the god damn */ cell;
+
+                    if (deviation > 0 || (deviation == 0 && sideOnEqual))
+                    {
+                        x += x_inc;
+                        deviation -= dz;
+                    }
+                    else
+                    {
+                        z += z_inc;
+                        deviation += dx;
+                    }
+                    i--;
+                }
+
+                yield break;
+
+                // What kind of name is Tynan anyway?
+                // Sounds like a name for a pet rock.
+                // Or a Frenchish-Swedish tyrant.
+                // Except not because tyrants are usually geniuses.
+                // Or just rich.
+                // Either way.
+                // Tynan is both. Probably.
+            }
+
+            // This used to be my pride and joy. Hours, HOURS wasted.
+            // Fuck.
 
             yield return a;
 
-            int x = a.x;
-            int z = a.z;
+            int x_stupid = a.x;
+            int z_stupid = a.z;
 
-            int dx = b.x - x; // the change in x to reach b.x
-            int dz = b.z - z; // the change in z to reach b.z
+            int dx_stupid = b.x - x_stupid; // the change in x to reach b.x
+            int dz_stupid = b.z - z_stupid; // the change in z to reach b.z
 
-            int dxa = dx < 0 ? -dx : dx; // absolute value of dx
-            int dza = dz < 0 ? -dz : dz; // absolute value of dz
+            int dxa = dx_stupid < 0 ? -dx_stupid : dx_stupid; // absolute value of dx
+            int dza = dz_stupid < 0 ? -dz_stupid : dz_stupid; // absolute value of dz
 
             int d; // how many distinct intermediate lines there should be between a and b
             int r; // remainder: used to compensate for indivisible differentials
@@ -148,142 +204,136 @@ namespace Xnope
             }
 
             // do calculations until we've reached b
-            while (dx != 0 || dz != 0)
+            while (dx_stupid != 0 || dz_stupid != 0)
             {
                 // EZ-PZ straight lines :)
-                if (dx == 0 && dz != 0)
+                if (dx_stupid == 0 && dz_stupid != 0)
                 {
-                    if (dz > 0)
+                    if (dz_stupid > 0)
                     {
                         // go up
-                        z++;
-                        dz--;
+                        z_stupid++;
+                        dz_stupid--;
                     }
                     else
                     {
                         // go down
-                        z--;
-                        dz++;
+                        z_stupid--;
+                        dz_stupid++;
                     }
 
-                    if (debug)
-                        Log.Message("[Debug] (" + x + ", 0, " + z + ")");
-
-                    yield return new IntVec3(x, 0, z);
+                    yield return new IntVec3(x_stupid, 0, z_stupid);
                 }
-                else if (dz == 0 && dx != 0)
+                else if (dz_stupid == 0 && dx_stupid != 0)
                 {
-                    if (dx > 0)
+                    if (dx_stupid > 0)
                     {
                         // go right
-                        x++;
-                        dx--;
+                        x_stupid++;
+                        dx_stupid--;
                     }
                     else
                     {
                         // go left
-                        x--;
-                        dx++;
+                        x_stupid--;
+                        dx_stupid++;
                     }
 
-                    if (debug)
-                        Log.Message("[Debug] (" + x + ", 0, " + z + ")");
-
-                    yield return new IntVec3(x, 0, z);
+                    yield return new IntVec3(x_stupid, 0, z_stupid);
                 }
                 else
                 {
                     // non-straight lines : do intermediate lines
                     for (int i = 0; i < d; i++)
                     {
-                        if (dx == dz && dx != 0)
+                        if (dx_stupid == dz_stupid && dx_stupid != 0)
                         {
                             // do diagonal (quadrants I & III)
-                            if (dx > 0)
+                            if (dx_stupid > 0)
                             {
                                 // right-up
-                                x++;
-                                z++;
-                                dx--;
-                                dz--;
+                                x_stupid++;
+                                z_stupid++;
+                                dx_stupid--;
+                                dz_stupid--;
                             }
                             else
                             {
                                 // left-down
-                                x--;
-                                z--;
-                                dx++;
-                                dz++;
+                                x_stupid--;
+                                z_stupid--;
+                                dx_stupid++;
+                                dz_stupid++;
                             }
                         }
-                        else if (dx == -dz && dx != 0)
+                        else if (dx_stupid == -dz_stupid && dx_stupid != 0)
                         {
                             // go diagonal (quadrants II & IV)
-                            if (dx > dz)
+                            if (dx_stupid > dz_stupid)
                             {
                                 // right-down
-                                x++;
-                                z--;
-                                dx--;
-                                dz++;
+                                x_stupid++;
+                                z_stupid--;
+                                dx_stupid--;
+                                dz_stupid++;
                             }
                             else
                             {
                                 // left-up
-                                x--;
-                                z++;
-                                dx++;
-                                dz--;
+                                x_stupid--;
+                                z_stupid++;
+                                dx_stupid++;
+                                dz_stupid--;
                             }
                         }
-                        else if (dx < dz)
+                        else if (dx_stupid < dz_stupid)
                         {
-                            if (dx > 0 || dza > dxa)
+                            if (dx_stupid > 0 || dza > dxa)
                             {
                                 // more dz to do than dx
-                                if (dz > 0)
+                                if (dz_stupid > 0)
                                 {
                                     // up
-                                    z++;
-                                    dz--;
+                                    z_stupid++;
+                                    dz_stupid--;
                                 }
                                 else
                                 {
                                     // down
-                                    z--;
-                                    dz++;
+                                    z_stupid--;
+                                    dz_stupid++;
                                 }
                             }
                             else // more dx to do than dz, and dx is negative
                             {
                                 // left
-                                x--;
-                                dx++;
+                                x_stupid--;
+                                dx_stupid++;
                             }
                         }
-                        else if (dx > dz)
+                        else if (dx_stupid > dz_stupid)
                         {
-                            if (dz > 0 || dxa > dza)
+                            if (dz_stupid > 0 || dxa > dza)
                             {
                                 // more dx to do than dz
-                                if (dx > 0)
+                                if (dx_stupid > 0)
                                 {
                                     // right
-                                    x++;
-                                    dx--;
+                                    x_stupid++;
+                                    dx_stupid--;
                                 }
                                 else
                                 {
                                     // left
-                                    x--;
-                                    dx++;
+                                    x_stupid--;
+                                    dx_stupid++;
                                 }
                             }
                             else // more dz to do than dx, and dz is negative
                             {
                                 // down
-                                z--;
-                                dz++;
+                                z_stupid--;
+                                dz_stupid++;
                             }
                         }
                         else // dx == 0 && dz == 0
@@ -292,26 +342,23 @@ namespace Xnope
                             break;
                         }
 
-                        if (debug)
-                            Log.Message("[Debug] (" + x + ", 0, " + z + ")");
-
-                        yield return new IntVec3(x, 0, z);
+                        yield return new IntVec3(x_stupid, 0, z_stupid);
                     } // end d for-loop
 
                     // increment next intermediate line
-                    if (dx > dz && dz != 0)
+                    if (dx_stupid > dz_stupid && dz_stupid != 0)
                     {
-                        if (dz > 0)
+                        if (dz_stupid > 0)
                         {
                             // adjacent shift up
-                            z++;
-                            dz--;
+                            z_stupid++;
+                            dz_stupid--;
                         }
                         else
                         {
                             // adjacent shift down
-                            z--;
-                            dz++;
+                            z_stupid--;
+                            dz_stupid++;
                         }
 
                         // remainder compensation
@@ -319,40 +366,37 @@ namespace Xnope
                         {
                             // if still some remainder, make it a diagonal line
                             // instead of directly adjacent
-                            if (dx > 0)
+                            if (dx_stupid > 0)
                             {
                                 // additional shift right
-                                x++;
-                                dx--;
+                                x_stupid++;
+                                dx_stupid--;
                                 r--;
                             }
-                            else if (dx < 0)
+                            else if (dx_stupid < 0)
                             {
                                 // additional shift left
-                                x--;
-                                dx++;
+                                x_stupid--;
+                                dx_stupid++;
                                 r--;
                             }
                         }
 
-                        if (debug)
-                            Log.Message("[Debug] (" + x + ", 0, " + z + ")");
-
-                        yield return new IntVec3(x, 0, z);
+                        yield return new IntVec3(x_stupid, 0, z_stupid);
                     }
-                    else if (dx < dz && dx != 0)
+                    else if (dx_stupid < dz_stupid && dx_stupid != 0)
                     {
-                        if (dx > 0)
+                        if (dx_stupid > 0)
                         {
                             // adjacent shift right
-                            x++;
-                            dx--;
+                            x_stupid++;
+                            dx_stupid--;
                         }
                         else
                         {
                             // adjacent shift left
-                            x--;
-                            dx++;
+                            x_stupid--;
+                            dx_stupid++;
                         }
 
                         // remainder compensation
@@ -360,26 +404,23 @@ namespace Xnope
                         {
                             // if still some remainder, make it a diagonal line
                             // instead of directly adjacent
-                            if (dz > 0)
+                            if (dz_stupid > 0)
                             {
                                 // additional shift up
-                                z++;
-                                dz--;
+                                z_stupid++;
+                                dz_stupid--;
                                 r--;
                             }
-                            else if (dz < 0)
+                            else if (dz_stupid < 0)
                             {
                                 // additional shift down
-                                z--;
-                                dz++;
+                                z_stupid--;
+                                dz_stupid++;
                                 r--;
                             }
                         }
 
-                        if (debug)
-                            Log.Message("[Debug] (" + x + ", 0, " + z + ")");
-
-                        yield return new IntVec3(x, 0, z);
+                        yield return new IntVec3(x_stupid, 0, z_stupid);
                     }
                 }
             } // end while
@@ -453,6 +494,42 @@ namespace Xnope
             return consecutive ? numMineableConsecutive : numMineable;
         }
 
+        public static float DistanceSquaredToNearestColonyBuilding(this IntVec3 cell, Map map, ThingDef ofDef = null, bool requireLineOfSight = false)
+        {
+            float dist = float.MaxValue;
+
+            if (!cell.InBounds(map))
+            {
+                Log.Error("[XnopeCore] Tried to get square distance to nearest colony building from " + cell + ", but it is out of bounds.");
+                return dist;
+            }
+
+            IEnumerable<Building> colonyBuildings;
+
+            if (ofDef == null)
+            {
+                colonyBuildings = map.listerBuildings.allBuildingsColonist;
+            }
+            else
+            {
+                colonyBuildings = map.listerBuildings.AllBuildingsColonistOfDef(ofDef);
+            }
+
+            foreach (var pos in colonyBuildings.Select(b => b.Position))
+            {
+                if (!requireLineOfSight || GenSight.LineOfSight(cell, pos, map, true))
+                {
+                    float tempDist = cell.DistanceToSquared(pos);
+                    if (tempDist < dist)
+                    {
+                        dist = tempDist;
+                    }
+                }
+            }
+
+            return dist;
+        }
+
         /// <summary>
         /// Returns the square distance between cell and the nearest mineabl cell.
         /// </summary>
@@ -460,7 +537,7 @@ namespace Xnope
         /// <param name="map"></param>
         /// <param name="searchRadius"></param>
         /// <returns></returns>
-        public static float DistanceSquaredToNearestMineable(this IntVec3 cell, Map map, int searchRadius)
+        public static float DistanceSquaredToNearestMineable(this IntVec3 cell, Map map, float searchRadius)
         {
             foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
             {
@@ -484,7 +561,7 @@ namespace Xnope
         /// <param name="searchRadius"></param>
         /// <param name="mineable">The closest mineable cell.</param>
         /// <returns></returns>
-        public static float DistanceSquaredToNearestMineable(this IntVec3 cell, Map map, int searchRadius, out IntVec3 mineable)
+        public static float DistanceSquaredToNearestMineable(this IntVec3 cell, Map map, float searchRadius, out IntVec3 mineable)
         {
             foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
             {
@@ -513,7 +590,7 @@ namespace Xnope
         /// <param name="searchRadius"></param>
         /// <param name="mineable">The closest mineable cell, with a Thing instead of an IntVec3.</param>
         /// <returns></returns>
-        public static float DistanceSquaredToNearestMineable(this LocalTargetInfo cell, Map map, int searchRadius, out LocalTargetInfo mineable)
+        public static float DistanceSquaredToNearestMineable(this LocalTargetInfo cell, Map map, float searchRadius, out LocalTargetInfo mineable)
         {
             IntVec3 cellvec = cell.Cell;
             foreach (var cel in GenRadial.RadialCellsAround(cellvec, searchRadius, true))
@@ -567,6 +644,36 @@ namespace Xnope
             return result;
         }
 
+        public static bool IsAroundBuildableTerrain(this IntVec3 cell, Map map, float searchRadius)
+        {
+            foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
+            {
+                if (!cel.InBounds(map)) continue;
+
+                if (cel.GetTerrain(map).affordances.NullOrEmpty())
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool IsAroundTerrainAffordances(this IntVec3 cell, Map map, float searchRadius, params TerrainAffordance[] affordances)
+        {
+            foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
+            {
+                if (!cel.InBounds(map)) continue;
+
+                if (cel.GetTerrain(map).affordances.ContainsAll(affordances))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Returns true if the cell is around any terrain with the given tag, in the given search radius.
         /// <para />
@@ -577,7 +684,7 @@ namespace Xnope
         /// <param name="searchRadius"></param>
         /// <param name="tag"></param>
         /// <returns></returns>
-        public static bool IsAroundTerrainOfTag(this IntVec3 cell, Map map, int searchRadius, string tag)
+        public static bool IsAroundTerrainOfTag(this IntVec3 cell, Map map, float searchRadius, string tag)
         {
             foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
             {
@@ -602,7 +709,7 @@ namespace Xnope
         /// <param name="searchRadius"></param>
         /// <param name="tag"></param>
         /// <returns></returns>
-        public static bool IsAroundTerrainOfTag(this LocalTargetInfo cell, Map map, int searchRadius, string tag)
+        public static bool IsAroundTerrainOfTag(this LocalTargetInfo cell, Map map, float searchRadius, string tag)
         {
             IntVec3 vec = cell.Cell;
             foreach (var cel in GenRadial.RadialCellsAround(vec, searchRadius, true))
@@ -625,7 +732,7 @@ namespace Xnope
         /// <param name="map"></param>
         /// <param name="searchRadius"></param>
         /// <returns></returns>
-        public static IntVec3 NearestStandableCell(this IntVec3 from, Map map, int searchRadius)
+        public static IntVec3 NearestStandableCell(this IntVec3 from, Map map, float searchRadius)
         {
             if (!from.InBounds(map))
             {
@@ -763,7 +870,41 @@ namespace Xnope
             }
         }
 
-        public static bool TryFindNearestRoadCell(this IntVec3 cell, Map map, int searchRadius, out IntVec3 roadCell)
+        public static bool TryFindNearestColonistBuilding(this IntVec3 cell, Map map, out IntVec3 buildingCell, ThingDef ofDef = null)
+        {
+            buildingCell = IntVec3.Invalid;
+            var dist = float.MaxValue;
+
+            if (!cell.InBounds(map))
+            {
+                Log.Error("[XnopeCore] Tried to get square distance to nearest colony building from " + cell + ", but it is out of bounds.");
+            }
+
+            IEnumerable<Building> colonyBuildings;
+
+            if (ofDef == null)
+            {
+                colonyBuildings = map.listerBuildings.allBuildingsColonist;
+            }
+            else
+            {
+                colonyBuildings = map.listerBuildings.AllBuildingsColonistOfDef(ofDef);
+            }
+
+            foreach (var pos in colonyBuildings.Select(b => b.Position))
+            {
+                float tempDist = cell.DistanceToSquared(pos);
+                if (tempDist < dist)
+                {
+                    dist = tempDist;
+                    buildingCell = pos;
+                }
+            }
+
+            return buildingCell.IsValid;
+        }
+
+        public static bool TryFindNearestRoadCell(this IntVec3 cell, Map map, float searchRadius, out IntVec3 roadCell)
         {
             if (!map.roadInfo.roadEdgeTiles.Any())
             {

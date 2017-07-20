@@ -9,6 +9,17 @@ namespace Xnope
     /// </summary>
     public static class EnumerableUtils
     {
+        public static bool ContainsAll<T>(this IEnumerable<T> enumerable, params T[] elements)
+        {
+            foreach (var e in elements)
+            {
+                if (!enumerable.Contains(e))
+                    return false;
+            }
+
+            return true;
+        }
+
         public static IEnumerable<T> LimitBetween<T>(this IEnumerable<T> enumerable, int lowerBound, int upperBound)
         {
             int length = enumerable.Count();
