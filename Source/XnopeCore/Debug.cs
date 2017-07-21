@@ -117,7 +117,7 @@ namespace Xnope
 
         public static void TestLineDraw(Map map, IntVec3 a, IntVec3 b)
         {
-            Log.Warning("[Debug] Spawning torches between " + a + " and " + b);
+            Log.Warning("[XnopeCore] Spawning torches between " + a + " and " + b);
 
             foreach (var cell in a.CellsInLineTo(b, true))
             {
@@ -129,8 +129,62 @@ namespace Xnope
                 }
             }
 
-            Log.Warning("[Debug] End line between " + a + " and " + b);
+            Log.Warning("[XnopeCore] End line between " + a + " and " + b);
         }
 
+        public static void TestRightTriangleDraw(Map map)
+        {
+            Log.Warning("[XnopeCore] Spawning torches in right triangles.");
+
+            var quadI = map.Center + IntVec3.North + IntVec3.East;
+            var quadII = map.Center + IntVec3.North + IntVec3.West;
+            var quadIII = map.Center + IntVec3.South + IntVec3.West;
+            var quadIV = map.Center + IntVec3.South + IntVec3.East;
+
+            foreach (var cell in CellsUtil.RightTriangleArea(quadI, 10, true))
+            {
+                var thing = ThingMaker.MakeThing(ThingDefOf.TorchLamp);
+
+                GenSpawn.Spawn(thing, cell, map);
+            }
+
+            foreach (var cell in CellsUtil.RightTriangleArea(quadII, -10, true))
+            {
+                var thing = ThingMaker.MakeThing(ThingDefOf.TorchLamp);
+
+                GenSpawn.Spawn(thing, cell, map);
+            }
+
+            foreach (var cell in CellsUtil.RightTriangleArea(quadIII, -10, false))
+            {
+                var thing = ThingMaker.MakeThing(ThingDefOf.TorchLamp);
+
+                GenSpawn.Spawn(thing, cell, map);
+            }
+
+            foreach (var cell in CellsUtil.RightTriangleArea(quadIV, 10, false))
+            {
+                var thing = ThingMaker.MakeThing(ThingDefOf.TorchLamp);
+
+                GenSpawn.Spawn(thing, cell, map);
+            }
+        }
+
+        public static void TestTriangleDraw(Map map)
+        {
+            Log.Warning("[XnopeCore] Spawning torches in right triangles.");
+
+            var centre = map.Center;
+            var targ = CellRect.WholeMap(map).RandomCell;
+            var halfAngle = Rand.Range(10, 80);
+            var magn = 20;
+
+            foreach (var cell in CellsUtil.TriangleAreaRough(centre, targ, 45, magn))
+            {
+                var thing = ThingMaker.MakeThing(ThingDefOf.TorchLamp);
+
+                GenSpawn.Spawn(thing, cell, map);
+            }
+        }
     }
 }

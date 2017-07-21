@@ -19,8 +19,14 @@ namespace Xnope
 
         }
 
+        public override void MapLoaded(Map map)
+        {
+            // For debugging
+            //Debug.TestRightTriangleDraw(map);
+            //Debug.TestTriangleDraw(map);
+        }
 
-        
+
         public override void DefsLoaded()
         {
             InjectSpawnCategories();

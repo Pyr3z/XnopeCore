@@ -96,6 +96,19 @@ namespace Xnope
             return cells.Average(multiplicityFactorFunc);
         }
 
+        public static IntVec3 AverageWith(this IntVec3 orig, params IntVec3[] others)
+        {
+            IntVec3[] arr = new IntVec3[others.Length];
+
+            arr[0] = orig;
+            for (int i = 1; i < arr.Length; i++)
+            {
+                arr[i] = others[i - 1];
+            }
+
+            return arr.Average();
+        }
+
         /// <summary>
         /// HOLY SHIT WHY DID NOBODY TELL ME ABOUT Verse.GenSight?!? Yields the cells in a line from a to b.
         /// </summary>
@@ -482,16 +495,62 @@ namespace Xnope
                 {
                     numMineable++;
                 }
-                else if (consecutive)
+                else if (consecutive && numMineable > numMineableConsecutive)
                 {
-                    if (numMineable > numMineableConsecutive)
-                        numMineableConsecutive = numMineable;
+                    numMineableConsecutive = numMineable;
 
                     numMineable = 0;
                 }
             }
 
             return consecutive ? numMineableConsecutive : numMineable;
+        }
+
+        public static int CountObstructingCellsTo(this IntVec3 a, IntVec3 b, Map map, bool consecutive = false)
+        {
+            if (!a.InBounds(map) || !b.InBounds(map))
+            {
+                Log.Error("One or both cells are not within the map: " + a + ", " + b);
+                return 0;
+            }
+
+            int num = 0;
+            int numConsecutive = 0;
+            foreach (var cell in a.CellsInLineTo(b))
+            {
+                if (!cell.CanBeSeenOverFast(map))
+                {
+                    num++;
+                }
+                else if (consecutive && num > numConsecutive)
+                {
+                    numConsecutive = num;
+
+                    num = 0;
+                }
+            }
+
+            return consecutive ? numConsecutive : num;
+        }
+
+        public static IntVec3 ClosestCellTo(this IEnumerable<IntVec3> cells, IntVec3 b, Map map)
+        {
+            var dist = float.MaxValue;
+            var result = IntVec3.Invalid;
+
+            foreach (var cell in cells)
+            {
+                if (!cell.InBounds(map)) continue;
+
+                var tempDist = cell.DistanceToSquared(b);
+                if (tempDist < dist)
+                {
+                    dist = tempDist;
+                    result = cell;
+                }
+            }
+
+            return result;
         }
 
         public static float DistanceSquaredToNearestColonyBuilding(this IntVec3 cell, Map map, ThingDef ofDef = null, bool requireLineOfSight = false)
@@ -868,6 +927,107 @@ namespace Xnope
                     Log.Error("Error when converting Rot4 to IntVec3. Expect more errors.");
                     return IntVec3.Invalid;
             }
+        }
+
+        /// <summary>
+        /// Yields the cells in the area of a right triangle.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="width"></param>
+        /// <param name="up"></param>
+        /// <returns></returns>
+        public static IEnumerable<IntVec3> RightTriangleArea(IntVec3 a, int width, bool up)
+        {
+            if (width == 0)
+            {
+                Log.Error("[XnopeCore] Tried to get an area of a right triangle, but width is 0. width=" + width);
+                yield break;
+            }
+
+            var xOffset = IntVec3.East * width;
+            var zOffset = IntVec3.North * (up ? width < 0 ? -width : width : width < 0 ? width : -width);
+            var b = a + xOffset;
+            var c = a + zOffset;
+
+            var x_inc = width < 0 ? -1 : 1;
+            var z_inc = up ? 1 : -1;
+
+            // May be the one case where my shitty method is better than Tynan's:
+            var hyp = b.CellsInLineTo(c, true).ToArray();
+
+            var cell = a;
+            yield return cell;
+
+            int i = 0;
+            while (i < hyp.Length)
+            {
+                while (cell.x != hyp[i].x)
+                {
+                    cell.x += x_inc;
+                    yield return cell;
+                }
+
+                cell.x = a.x;
+                
+                if (cell.z != c.z)
+                {
+                    cell.z += z_inc;
+                    yield return cell;
+                }
+
+                i++;
+            }
+        }
+
+        public static IEnumerable<IntVec3> RightTriangleArea(IntVec3 a, int width, Rot4 rot1, Rot4 rot2)
+        {
+            if (rot1 == Rot4.North && rot2 == Rot4.East)
+            {
+                return RightTriangleArea(a, width < 0 ? -width : width, true);
+            }
+            if (rot1 == Rot4.North && rot2 == Rot4.West)
+            {
+                return RightTriangleArea(a, width < 0 ? -width : width, true);
+            }
+            if (rot1 == Rot4.South && rot2 == Rot4.West)
+            {
+                return RightTriangleArea(a, width < 0 ? width : -width, false);
+            }
+            if (rot1 == Rot4.South && rot2 == Rot4.East)
+            {
+                return RightTriangleArea(a, width < 0 ? width : -width, false);
+            }
+
+            Log.Error("[XnopeCore] Tried to get a right triangle area with invalid rotations. rot1=" + rot1 + ", rot2=" + rot2);
+            return null;
+        }
+
+        public static IEnumerable<IntVec3> TriangleAreaRough(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength)
+        {
+            var dirVec = (dir.ToVector3Shifted() - a.ToVector3Shifted());
+            dirVec = Vector3.ClampMagnitude(dirVec, sideLength);
+
+            var b = dirVec.RotatedBy(halfAngle).ToIntVec3() + a;
+            var c = dirVec.RotatedBy(-halfAngle).ToIntVec3() + a;
+
+            var lineAB = a.CellsInLineTo(b).ToArray();
+            var lineAC = a.CellsInLineTo(c).ToArray();
+
+            var hashset = new HashSet<IntVec3>();
+
+            var maxI = Mathf.Min(lineAB.Length, lineAC.Length);
+            int i = 0;
+            while (i < maxI)
+            {
+                foreach (var cell in lineAB[i].CellsInLineTo(lineAC[i]))
+                {
+                    hashset.Add(cell);
+                }
+
+                i++;
+            }
+
+            return hashset;
         }
 
         public static bool TryFindNearestColonistBuilding(this IntVec3 cell, Map map, out IntVec3 buildingCell, ThingDef ofDef = null)
