@@ -510,7 +510,7 @@ namespace Xnope
         {
             if (!a.InBounds(map) || !b.InBounds(map))
             {
-                Log.Error("One or both cells are not within the map: " + a + ", " + b);
+                Log.Error("[XnopeCore] Error counting obstructions. One or both cells are not within the map: " + a + ", " + b);
                 return 0;
             }
 
@@ -1002,10 +1002,10 @@ namespace Xnope
             return null;
         }
 
-        public static IEnumerable<IntVec3> TriangleAreaRough(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength)
+        public static IEnumerable<IntVec3> TriangleAreaRough(IntVec3 a, IntVec3 dir, float halfAngle, float heightLength)
         {
-            var dirVec = (dir.ToVector3Shifted() - a.ToVector3Shifted());
-            dirVec = Vector3.ClampMagnitude(dirVec, sideLength);
+            var dirVec = dir.ToVector3Shifted() - a.ToVector3Shifted();
+            dirVec = Vector3.ClampMagnitude(dirVec, heightLength);
 
             var b = dirVec.RotatedBy(halfAngle).ToIntVec3() + a;
             var c = dirVec.RotatedBy(-halfAngle).ToIntVec3() + a;
