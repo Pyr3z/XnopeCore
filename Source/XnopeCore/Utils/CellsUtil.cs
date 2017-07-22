@@ -110,20 +110,20 @@ namespace Xnope
         }
 
         /// <summary>
-        /// HOLY SHIT WHY DID NOBODY TELL ME ABOUT Verse.GenSight?!? Yields the cells in a line from a to b.
+        /// Yields the cells in a line from a to b.
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
-        /// <param name="useFuckedUpVersion">If true, will use the fucked up version of the calculation. (My version.)</param>
+        /// <param name="useOldVersion">If true, will use the old version of the calculation. (My version.)</param>
         /// <returns></returns>
-        public static IEnumerable<IntVec3> CellsInLineTo(this IntVec3 a, IntVec3 b, bool useFuckedUpVersion = false)
+        public static IEnumerable<IntVec3> CellsInLineTo(this IntVec3 a, IntVec3 b, bool useOldVersion = false)
         {
             if (Find.VisibleMap != null && (!a.InBounds(Find.VisibleMap) || !b.InBounds(Find.VisibleMap)))
             {
                 Log.Error("Cell out of map bounds while calculating a line. Calculation will continue, but you may expect further errors. a=" + a + " b=" + b);
             }
 
-            if (!useFuckedUpVersion)
+            if (!useOldVersion)
             {
                 // Fuck me. I hate Tynan and his genius bullshit.
                 // Copyright Verse.GenSight.PointsOnLineOfSight(). Fuck.
@@ -178,9 +178,6 @@ namespace Xnope
                 // Either way.
                 // Tynan is both. Probably.
             }
-
-            // This used to be my pride and joy. Hours, HOURS wasted.
-            // Fuck.
 
             yield return a;
 
@@ -668,6 +665,43 @@ namespace Xnope
             return float.MaxValue;
         }
 
+        public static float DistanceToMapEdge(this IntVec3 cell, Map map)
+        {
+            if (!cell.InBounds(map))
+            {
+                Log.Error("[XnopeCore] Tried to get distance from " + cell + " to map edge, but it is out of bounds.");
+                return float.MaxValue;
+            }
+
+            var centre = map.Center;
+            var size = map.Size;
+
+            if (cell.x < centre.x)
+            {
+                if (cell.z < centre.z)
+                {
+                    return Mathf.Min(cell.x, cell.z);
+                }
+                else
+                {
+                    return Mathf.Min(cell.x, size.z - cell.z);
+                }
+            }
+            else
+            {
+                if (cell.z < centre.z)
+                {
+                    return Mathf.Min(size.x - cell.x, cell.z);
+                }
+                else
+                {
+                    return Mathf.Min(size.x - cell.x, size.z - cell.z);
+                }
+            }
+
+
+        }
+
         /// <summary>
         /// Finds the furthest cell in the rect from point.
         /// <para />
@@ -703,13 +737,15 @@ namespace Xnope
             return result;
         }
 
-        public static bool IsAroundBuildableTerrain(this IntVec3 cell, Map map, float searchRadius)
+        public static bool IsAroundGoodTerrain(this IntVec3 cell, Map map, float searchRadius)
         {
             foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
             {
                 if (!cel.InBounds(map)) continue;
 
-                if (cel.GetTerrain(map).affordances.NullOrEmpty())
+                var terr = cel.GetTerrain(map);
+
+                if (terr.affordances.NullOrEmpty() || terr.avoidWander || terr.HasTag("Water"))
                 {
                     return false;
                 }
@@ -795,7 +831,7 @@ namespace Xnope
         {
             if (!from.InBounds(map))
             {
-                Log.Error("Cell out of bounds: " + from);
+                Log.Warning("[XnopeCore] Tried to find nearest standable cell, but it is out of bounds: " + from);
                 return IntVec3.Invalid;
             }
 
@@ -928,6 +964,37 @@ namespace Xnope
                     return IntVec3.Invalid;
             }
         }
+        
+        public static IEnumerable<IntVec3> RandomTriangularBisections(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength, float minDist, int numBisections = 1)
+        {
+            var dirVec = dir.ToVector3Shifted() - a.ToVector3Shifted();
+            dirVec = Vector3.ClampMagnitude(dirVec, sideLength);
+            var minOffsetVec = Vector3.ClampMagnitude(dirVec, minDist);
+
+            var b = dirVec.RotatedBy(halfAngle).ToIntVec3() + a;
+            var c = dirVec.RotatedBy(-halfAngle).ToIntVec3() + a;
+
+            var bStart = minOffsetVec.RotatedBy(halfAngle).ToIntVec3() + a;
+            var cStart = minOffsetVec.RotatedBy(-halfAngle).ToIntVec3() + a;
+
+            var lineAB = bStart.CellsInLineTo(b).ToArray();
+            var lineAC = cStart.CellsInLineTo(c).ToArray();
+
+            var maxI = Mathf.Min(lineAB.Length, lineAC.Length);
+
+            int bisections = 0;
+            while (bisections < numBisections)
+            {
+                var randI = Rand.Range(0, maxI);
+
+                foreach (var cell in lineAB[randI].CellsInLineTo(lineAC[randI]))
+                {
+                    yield return cell;
+                }
+
+                bisections++;
+            }
+        }
 
         /// <summary>
         /// Yields the cells in the area of a right triangle.
@@ -1002,10 +1069,10 @@ namespace Xnope
             return null;
         }
 
-        public static IEnumerable<IntVec3> TriangleAreaRough(IntVec3 a, IntVec3 dir, float halfAngle, float heightLength)
+        public static IEnumerable<IntVec3> TriangleAreaRough(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength)
         {
             var dirVec = dir.ToVector3Shifted() - a.ToVector3Shifted();
-            dirVec = Vector3.ClampMagnitude(dirVec, heightLength);
+            dirVec = Vector3.ClampMagnitude(dirVec, sideLength);
 
             var b = dirVec.RotatedBy(halfAngle).ToIntVec3() + a;
             var c = dirVec.RotatedBy(-halfAngle).ToIntVec3() + a;

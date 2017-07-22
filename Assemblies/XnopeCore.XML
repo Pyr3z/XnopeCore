@@ -44,11 +44,11 @@
         </member>
         <member name="M:Xnope.CellsUtil.CellsInLineTo(Verse.IntVec3,Verse.IntVec3,System.Boolean)">
             <summary>
-            HOLY SHIT WHY DID NOBODY TELL ME ABOUT Verse.GenSight?!? Yields the cells in a line from a to b.
+            Yields the cells in a line from a to b.
             </summary>
             <param name="a"></param>
             <param name="b"></param>
-            <param name="useFuckedUpVersion">If true, will use the fucked up version of the calculation. (My version.)</param>
+            <param name="useOldVersion">If true, will use the old version of the calculation. (My version.)</param>
             <returns></returns>
         </member>
         <member name="M:Xnope.CellsUtil.CornerlessEdgeCells(Verse.CellRect)">
