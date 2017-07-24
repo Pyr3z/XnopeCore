@@ -110,6 +110,43 @@ namespace Xnope
         }
 
         /// <summary>
+        /// Checks if c is between lineA and lineB.
+        /// <para />
+        /// lineA must be counter-clockwise of lineB w.r.t. their intersection, and they cannot be equal.
+        /// </summary>
+        /// <param name="lineA"></param>
+        /// <param name="lineB"></param>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        public static bool CellIsBetween(CellLine lineA, CellLine lineB, IntVec3 c)
+        {
+            bool aPos = lineA.Slope > 0;
+            bool bPos = lineB.Slope > 0;
+            bool oppositeSigns = aPos != bPos;
+            bool sameQuad = !oppositeSigns && lineA.Slope > lineB.Slope;
+            bool oppositeQuads = !oppositeSigns && lineA.Slope < lineB.Slope;
+
+            if (sameQuad || (bPos && !aPos))
+            {
+                return lineA.CellIsLeft(c) == lineB.CellIsLeft(c);
+            }
+
+            if (oppositeQuads || (aPos && !bPos))
+            {
+                return lineA.CellIsLeft(c) != lineB.CellIsLeft(c);
+            }
+
+            // I may have figured this out on my own, but I still have no fucking clue why it works.
+
+            return lineA.CellIsAbove(c) != lineB.CellIsAbove(c);
+        }
+
+        public static bool CellIsLeft(this CellLine line, IntVec3 c)
+        {
+            return c.x < (c.z - line.ZIntercept) / line.Slope;
+        }
+
+        /// <summary>
         /// Yields the cells in a line from a to b.
         /// </summary>
         /// <param name="a"></param>
@@ -964,28 +1001,54 @@ namespace Xnope
                     return IntVec3.Invalid;
             }
         }
-        
-        public static IEnumerable<IntVec3> RandomTriangularBisections(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength, float minDist, int numBisections = 1)
+
+        public static IEnumerable<IntVec3> RandomCellsInTriangleFast(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength, int numCells = 1, Predicate<IntVec3> validator = null)
         {
             var dirVec = dir.ToVector3Shifted() - a.ToVector3Shifted();
             dirVec = Vector3.ClampMagnitude(dirVec, sideLength);
-            var minOffsetVec = Vector3.ClampMagnitude(dirVec, minDist);
 
             var b = dirVec.RotatedBy(halfAngle).ToIntVec3() + a;
             var c = dirVec.RotatedBy(-halfAngle).ToIntVec3() + a;
 
-            var bStart = minOffsetVec.RotatedBy(halfAngle).ToIntVec3() + a;
-            var cStart = minOffsetVec.RotatedBy(-halfAngle).ToIntVec3() + a;
+            var lineAB = CellLine.Between(a, b);
+            var lineAC = CellLine.Between(a, c);
 
-            var lineAB = bStart.CellsInLineTo(b).ToArray();
-            var lineAC = cStart.CellsInLineTo(c).ToArray();
+            var candidates = CellRect.FromLimits(
+                new IntVec3(Mathf.Min(a.x, b.x, c.x), 0, Mathf.Min(a.z, b.z, c.z)),
+                new IntVec3(Mathf.Max(a.x, b.x, c.x), 0, Mathf.Max(a.z, b.z, c.z))
+            );
+
+            for (int i = 0; i < numCells; i++)
+            {
+                for (int j = 0; j < 100; j++)
+                {
+                    var rand = candidates.RandomCell;
+
+                    if (CellIsBetween(lineAB, lineAC, rand) && (validator == null || validator(rand)))
+                    {
+                        yield return rand;
+                        break;
+                    }
+
+                    if (j == 99)
+                    {
+                        Log.Error("[XnopeCore] Could not find a random cell within a triangle.");
+                    }
+                }
+            }
+        }
+
+        public static IEnumerable<IntVec3> RandomTriangularBisections(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength, float minDist = 0f, int numBisections = 1)
+        {
+            var lineAB = TriangleSide(a, dir, halfAngle, sideLength, minDist);
+            var lineAC = TriangleSide(a, dir, -halfAngle, sideLength, minDist);
 
             var maxI = Mathf.Min(lineAB.Length, lineAC.Length);
 
             int bisections = 0;
             while (bisections < numBisections)
             {
-                var randI = Rand.Range(0, maxI);
+                var randI = Rand.RangeInclusive(0, maxI - 1);
 
                 foreach (var cell in lineAB[randI].CellsInLineTo(lineAC[randI]))
                 {
@@ -1069,16 +1132,10 @@ namespace Xnope
             return null;
         }
 
-        public static IEnumerable<IntVec3> TriangleAreaRough(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength)
+        public static IEnumerable<IntVec3> TriangleAreaRough(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength, float minDist = 0f)
         {
-            var dirVec = dir.ToVector3Shifted() - a.ToVector3Shifted();
-            dirVec = Vector3.ClampMagnitude(dirVec, sideLength);
-
-            var b = dirVec.RotatedBy(halfAngle).ToIntVec3() + a;
-            var c = dirVec.RotatedBy(-halfAngle).ToIntVec3() + a;
-
-            var lineAB = a.CellsInLineTo(b).ToArray();
-            var lineAC = a.CellsInLineTo(c).ToArray();
+            var lineAB = TriangleSide(a, dir, halfAngle, sideLength, minDist);
+            var lineAC = TriangleSide(a, dir, -halfAngle, sideLength, minDist);
 
             var hashset = new HashSet<IntVec3>();
 
@@ -1095,6 +1152,24 @@ namespace Xnope
             }
 
             return hashset;
+        }
+
+        public static IntVec3[] TriangleSide(IntVec3 a, IntVec3 dir, float angle, float sideLength, float minDist = 0f)
+        {
+            var dirVec = dir.ToVector3Shifted() - a.ToVector3Shifted();
+            dirVec = Vector3.ClampMagnitude(dirVec, sideLength);
+
+            var b = dirVec.RotatedBy(angle).ToIntVec3() + a;
+
+            var bStart = a;
+
+            if (minDist > 0f)
+            {
+                var minOffsetVec = Vector3.ClampMagnitude(dirVec, minDist);
+                bStart = minOffsetVec.RotatedBy(angle).ToIntVec3() + a;
+            }
+
+            return bStart.CellsInLineTo(b).ToArray();
         }
 
         public static bool TryFindNearestColonistBuilding(this IntVec3 cell, Map map, out IntVec3 buildingCell, ThingDef ofDef = null)
