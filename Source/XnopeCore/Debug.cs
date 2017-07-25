@@ -266,5 +266,22 @@ namespace Xnope
                 }
             }
         }
+
+        public static void TestCellTriangleDraw(Map map)
+        {
+            var centre = map.Center;
+            var targ = CellRect.WholeMap(map).RandomCell;
+            var halfAngle = Rand.Range(20, 80);
+            var magn = 20;
+
+            var tri = CellTriangle.FromTarget(centre, targ, halfAngle, magn);
+
+            foreach (var cell in tri)
+            {
+                var thing = ThingMaker.MakeThing(ThingDefOf.Snowman);
+
+                GenSpawn.Spawn(thing, cell, map);
+            }
+        }
     }
 }

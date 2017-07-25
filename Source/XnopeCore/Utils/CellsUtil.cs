@@ -1004,38 +1004,9 @@ namespace Xnope
 
         public static IEnumerable<IntVec3> RandomCellsInTriangleFast(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength, int numCells = 1, Predicate<IntVec3> validator = null)
         {
-            var dirVec = dir.ToVector3Shifted() - a.ToVector3Shifted();
-            dirVec = Vector3.ClampMagnitude(dirVec, sideLength);
+            var tri = CellTriangle.FromTarget(a, dir, halfAngle, sideLength);
 
-            var b = dirVec.RotatedBy(halfAngle).ToIntVec3() + a;
-            var c = dirVec.RotatedBy(-halfAngle).ToIntVec3() + a;
-
-            var lineAB = CellLine.Between(a, b);
-            var lineAC = CellLine.Between(a, c);
-
-            var candidates = CellRect.FromLimits(
-                new IntVec3(Mathf.Min(a.x, b.x, c.x), 0, Mathf.Min(a.z, b.z, c.z)),
-                new IntVec3(Mathf.Max(a.x, b.x, c.x), 0, Mathf.Max(a.z, b.z, c.z))
-            );
-
-            for (int i = 0; i < numCells; i++)
-            {
-                for (int j = 0; j < 100; j++)
-                {
-                    var rand = candidates.RandomCell;
-
-                    if (CellIsBetween(lineAB, lineAC, rand) && (validator == null || validator(rand)))
-                    {
-                        yield return rand;
-                        break;
-                    }
-
-                    if (j == 99)
-                    {
-                        Log.Error("[XnopeCore] Could not find a random cell within a triangle.");
-                    }
-                }
-            }
+            foreach (var cell in tri.RandomUniqueCells(numCells, validator)) yield return cell;
         }
 
         public static IEnumerable<IntVec3> RandomTriangularBisections(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength, float minDist = 0f, int numBisections = 1)
@@ -1154,6 +1125,19 @@ namespace Xnope
             return hashset;
         }
 
+        public static bool TriangleContains(IntVec3 a, IntVec3 dir, IntVec3 cell, float halfAngle, float sideLength)
+        {
+            var dirVec = dir.ToVector3Shifted() - a.ToVector3Shifted();
+            dirVec = Vector3.ClampMagnitude(dirVec, sideLength);
+
+            var b = dirVec.RotatedBy(halfAngle).ToIntVec3() + a;
+            var c = dirVec.RotatedBy(-halfAngle).ToIntVec3() + a;
+
+            var tri = new CellTriangle(a, b, c);
+
+            return tri.Contains(cell);
+        }
+
         public static IntVec3[] TriangleSide(IntVec3 a, IntVec3 dir, float angle, float sideLength, float minDist = 0f)
         {
             var dirVec = dir.ToVector3Shifted() - a.ToVector3Shifted();
@@ -1234,6 +1218,42 @@ namespace Xnope
             }
 
             roadCell = tempCell;
+
+            return tempCell.IsValid;
+        }
+
+        public static bool TryFindNearestCellToRoad(this IEnumerable<IntVec3> cells, Map map, float searchRadius, out IntVec3 nearCell)
+        {
+            if (!map.roadInfo.roadEdgeTiles.Any())
+            {
+                nearCell = IntVec3.Invalid;
+                return false;
+            }
+
+            var dist = float.MaxValue;
+            var tempCell = IntVec3.Invalid;
+
+            var centre = cells.Average();
+            IntVec3 dirRoad;
+
+            if (TryFindNearestRoadCell(centre, map, searchRadius, out dirRoad))
+            {
+                foreach (var cell in cells)
+                {
+                    if (TriangleContains(centre, dirRoad, cell, 85, searchRadius))
+                    {
+                        float tempDist = cell.DistanceToSquared(dirRoad);
+
+                        if (tempDist < dist)
+                        {
+                            dist = tempDist;
+                            tempCell = cell;
+                        }
+                    }
+                }
+            }
+
+            nearCell = tempCell;
 
             return tempCell.IsValid;
         }

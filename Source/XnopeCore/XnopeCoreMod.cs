@@ -29,6 +29,7 @@ namespace Xnope
             //Debug.TestRandomCellsInTriangleDraw(map, Rot4.South);
             //Debug.TestRandomCellsInTriangleDraw(map, Rot4.West);
             //Debug.TestRandomCellsInTriangleDraw(map);
+            //Debug.TestTriangleDraw(map);
         }
 
 
