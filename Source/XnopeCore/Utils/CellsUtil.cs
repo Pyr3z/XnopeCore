@@ -1,8 +1,10 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace Xnope
 {
@@ -14,6 +16,14 @@ namespace Xnope
     /// </summary>
     public static class CellsUtil
     {
+        private static IntVec3 cachedAverageColPos = IntVec3.Invalid;
+
+        public static void Cleanup()
+        {
+            cachedAverageColPos = IntVec3.Invalid;
+        }
+
+
         /// <summary>
         /// Averages an IEnumerable of cells, with an optional multiplicity function that
         /// determines how much weight a specific kind of cell should have on the average.
@@ -107,6 +117,44 @@ namespace Xnope
             }
 
             return arr.Average();
+        }
+
+        public static IntVec3 AverageColonistPosition(Map map, bool cache = true)
+        {
+            if (cache && cachedAverageColPos.IsValid)
+            {
+                return cachedAverageColPos;
+            }
+
+            var colonistThingsLocList = new List<IntVec3>();
+
+            foreach (var pawn in map.mapPawns.FreeColonistsSpawned)
+            {
+                colonistThingsLocList.Add(pawn.Position);
+            }
+            foreach (var building in map.listerBuildings.allBuildingsColonist.Where(b => b.def == ThingDefOf.Wall || b is IAttackTarget))
+            {
+                colonistThingsLocList.Add(building.Position);
+            }
+
+            colonistThingsLocList.Add(ApproxClosestColonistBuilding(map, map.Center, ThingDefOf.Door));
+
+            var ave = colonistThingsLocList.Average();
+
+            Log.Message("[XnopeCore] Cached average colonist position: " + ave);
+            cachedAverageColPos = ave;
+
+            return ave;
+        }
+
+        public static IntVec3 ApproxClosestColonistBuilding(Map map, IntVec3 from, ThingDef def)
+        {
+            var result = IntVec3.Invalid;
+            var ave = from.AverageWith(AverageColonistPosition(map));
+
+            ave.TryFindNearestColonistBuilding(map, out result, def);
+
+            return result;
         }
 
         /// <summary>
@@ -1177,19 +1225,6 @@ namespace Xnope
             return IntVec3.Invalid;
         }
 
-        public static bool TriangleContains(IntVec3 a, IntVec3 dir, IntVec3 cell, float halfAngle, float sideLength)
-        {
-            var dirVec = dir.ToVector3Shifted() - a.ToVector3Shifted();
-            dirVec = Vector3.ClampMagnitude(dirVec, sideLength);
-
-            var b = dirVec.RotatedBy(halfAngle).ToIntVec3() + a;
-            var c = dirVec.RotatedBy(-halfAngle).ToIntVec3() + a;
-
-            var tri = new CellTriangle(a, b, c);
-
-            return tri.Contains(cell);
-        }
-
         public static IntVec3[] TriangleSide(IntVec3 a, IntVec3 dir, float angle, float sideLength, float minDist = 0f)
         {
             var dirVec = dir.ToVector3Shifted() - a.ToVector3Shifted();
@@ -1331,15 +1366,12 @@ namespace Xnope
             {
                 foreach (var cell in cells)
                 {
-                    if (TriangleContains(centre, dirRoad, cell, 85, searchRadius))
-                    {
-                        float tempDist = cell.DistanceToSquared(dirRoad);
+                    float tempDist = cell.DistanceToSquared(dirRoad);
 
-                        if (tempDist < dist)
-                        {
-                            dist = tempDist;
-                            tempCell = cell;
-                        }
+                    if (tempDist < dist)
+                    {
+                        dist = tempDist;
+                        tempCell = cell;
                     }
                 }
             }

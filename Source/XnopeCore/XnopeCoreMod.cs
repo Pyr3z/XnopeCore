@@ -3,6 +3,7 @@ using Verse;
 using RimWorld;
 using Xnope.Defs;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Xnope
 {
@@ -21,6 +22,8 @@ namespace Xnope
 
         public override void MapLoaded(Map map)
         {
+            CellsUtil.Cleanup();
+
             // For debugging
             //Debug.TestRightTriangleDraw(map);
             //Debug.TestTriangleDraw(map);

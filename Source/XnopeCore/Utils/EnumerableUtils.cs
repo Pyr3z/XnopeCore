@@ -141,11 +141,10 @@ namespace Xnope
             var iRange = new IntRange(0, arr.Count - 1);
 
             int i = iRange.RandomInRange;
-            while (numElements > 0)
+            while (numElements-- > 0)
             {
                 yield return arr[i];
                 i = iRange.RandomInRange;
-                numElements--;
             }
         }
 
