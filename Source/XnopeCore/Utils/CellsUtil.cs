@@ -98,7 +98,7 @@ namespace Xnope
 
         public static IntVec3 AverageWith(this IntVec3 orig, params IntVec3[] others)
         {
-            IntVec3[] arr = new IntVec3[others.Length];
+            IntVec3[] arr = new IntVec3[others.Length + 1];
 
             arr[0] = orig;
             for (int i = 1; i < arr.Length; i++)
@@ -141,6 +141,12 @@ namespace Xnope
             return lineA.CellIsAbove(c) != lineB.CellIsAbove(c);
         }
 
+        /// <summary>
+        /// Similar to CellLine.CellIsAbove(), tells if a cell is left of a line. This accounts for whether or not a slope is negative.
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="c"></param>
+        /// <returns></returns>
         public static bool CellIsLeft(this CellLine line, IntVec3 c)
         {
             return c.x < (c.z - line.ZIntercept) / line.Slope;
@@ -157,7 +163,7 @@ namespace Xnope
         {
             if (Find.VisibleMap != null && (!a.InBounds(Find.VisibleMap) || !b.InBounds(Find.VisibleMap)))
             {
-                Log.Error("Cell out of map bounds while calculating a line. Calculation will continue, but you may expect further errors. a=" + a + " b=" + b);
+                Log.Error("[XnopeCore] Cell out of map bounds while calculating a line. Calculation will continue, but you may expect further errors. a=" + a + " b=" + b);
             }
 
             if (!useOldVersion)
@@ -185,7 +191,7 @@ namespace Xnope
                 dx *= 2; // Who the fuck knows why he did this.
                 dz *= 2;
 
-                IntVec3 cell = default(IntVec3);
+                IntVec3 cell = a;
                 while (i > 1)
                 {
                     cell.x = x;
@@ -898,18 +904,6 @@ namespace Xnope
             return IntVec3.Invalid;
         }
 
-        public static IntVec3 OppositeVector(this IntVec3 cell, Map map = null)
-        {
-            var opp = new IntVec3(-cell.x, 0, -cell.z);
-
-            if (map == null || opp.InBounds(map))
-            {
-                return opp;
-            }
-
-            return IntVec3.Invalid;
-        }
-
         /// <summary>
         /// Returns the cardinal direction facing 'to', from the perspective of 'from'.
         /// </summary>
@@ -1031,13 +1025,6 @@ namespace Xnope
             }
         }
 
-        public static IEnumerable<IntVec3> RandomCellsInTriangleFast(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength, int numCells = 1, Predicate<IntVec3> validator = null)
-        {
-            var tri = CellTriangle.FromTarget(a, dir, halfAngle, sideLength);
-
-            foreach (var cell in tri.RandomUniqueCells(numCells, validator)) yield return cell;
-        }
-
         public static IEnumerable<IntVec3> RandomTriangularBisections(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength, float minDist = 0f, int numBisections = 1)
         {
             var lineAB = TriangleSide(a, dir, halfAngle, sideLength, minDist);
@@ -1132,26 +1119,62 @@ namespace Xnope
             return null;
         }
 
-        public static IEnumerable<IntVec3> TriangleAreaRough(IntVec3 a, IntVec3 dir, float halfAngle, float sideLength, float minDist = 0f)
+        public static IntVec3 TranslateToward(this IntVec3 cell, Rot4 dir, int amount, Map map = null)
         {
-            var lineAB = TriangleSide(a, dir, halfAngle, sideLength, minDist);
-            var lineAC = TriangleSide(a, dir, -halfAngle, sideLength, minDist);
+            var result = cell + dir.ToIntVec3() * amount;
 
-            var hashset = new HashSet<IntVec3>();
-
-            var maxI = Mathf.Min(lineAB.Length, lineAC.Length);
-            int i = 0;
-            while (i < maxI)
+            if (map != null && !result.InBounds(map))
             {
-                foreach (var cell in lineAB[i].CellsInLineTo(lineAC[i]))
-                {
-                    hashset.Add(cell);
-                }
-
-                i++;
+                Log.Error("[XnopeCore] Tried to translate " + cell + " toward " + dir + " by " + amount + ", which resulted in a cell out of bounds. Expect further errors.");
             }
 
-            return hashset;
+            return result;
+        }
+
+        public static IntVec3 TranslateToward(this IntVec3 cell, Rot4 dir, Predicate<IntVec3> until)
+        {
+            var inc = dir.ToIntVec3();
+            for (int i = 0; i < 250; i++)
+            {
+                if (until(cell))
+                {
+                    return cell;
+                }
+
+                cell += inc;
+            }
+
+            Log.Error("[XnopeCore] Tried to translate a cell by predicate, which was never satisfied after 250 tries. cell=" + cell + ", dir=" + dir);
+            return IntVec3.Invalid;
+        }
+
+        public static IntVec3 TranslateToward(this IntVec3 cell, IntVec3 targ, int amount, Map map = null)
+        {
+            foreach (var cel in cell.CellsInLineTo(targ))
+            {
+                if (amount-- == 0)
+                {
+                    if (map != null && !cel.InBounds(map))
+                        Log.Error("[XnopeCore] Tried to translate " + cell + " toward " + targ + " by " + amount + ", which resulted in a cell out of bounds. Expect further errors.");
+
+                    return cel;
+                }
+            }
+
+            Log.Error("[XnopeCore] Tried to translate a cell by amount=" + amount + ", which was longer than the distance between " + cell + " and " + targ + ".");
+            return IntVec3.Invalid;
+        }
+
+        public static IntVec3 TranslateToward(this IntVec3 cell, IntVec3 targ, Predicate<IntVec3> until)
+        {
+            foreach (var cel in cell.CellsInLineTo(targ))
+            {
+                if (until(cel))
+                    return cel;
+            }
+
+            Log.Error("[XnopeCore] Tried to translate a cell by predicate, which was never satisfied. cell=" + cell + ", targ=" + targ);
+            return IntVec3.Invalid;
         }
 
         public static bool TriangleContains(IntVec3 a, IntVec3 dir, IntVec3 cell, float halfAngle, float sideLength)
@@ -1219,6 +1242,46 @@ namespace Xnope
             return buildingCell.IsValid;
         }
 
+        public static bool TryFindNearestAndFurthestRoadCell(this IntVec3 cell, Map map, float searchRadius, out IntVec3 roadNear, out IntVec3 roadFar)
+        {
+            if (!map.roadInfo.roadEdgeTiles.Any())
+            {
+                roadNear = IntVec3.Invalid;
+                roadFar = IntVec3.Invalid;
+                return false;
+            }
+
+            var distNear = float.MaxValue;
+            var distFar = 0;
+            var nearCell = IntVec3.Invalid;
+            var farCell = IntVec3.Invalid;
+
+            foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
+            {
+                if (!cel.InBounds(map)) continue;
+
+                if (cel.GetTerrain(map).HasTag("Road"))
+                {
+                    var tempDist = cell.DistanceToSquared(cel);
+
+                    if (tempDist < distNear)
+                    {
+                        distNear = tempDist;
+                        nearCell = cel;
+                    }
+                    else if (tempDist > distFar)
+                    {
+                        distFar = tempDist;
+                        farCell = cel;
+                    }
+                }
+            }
+
+            roadNear = nearCell;
+            roadFar = farCell;
+            return roadNear.IsValid || roadFar.IsValid;
+        }
+
         public static bool TryFindNearestRoadCell(this IntVec3 cell, Map map, float searchRadius, out IntVec3 roadCell)
         {
             if (!map.roadInfo.roadEdgeTiles.Any())
@@ -1247,8 +1310,7 @@ namespace Xnope
             }
 
             roadCell = tempCell;
-
-            return tempCell.IsValid;
+            return roadCell.IsValid;
         }
 
         public static bool TryFindNearestCellToRoad(this IEnumerable<IntVec3> cells, Map map, float searchRadius, out IntVec3 nearCell)

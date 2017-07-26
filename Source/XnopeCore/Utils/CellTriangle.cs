@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Verse;
 
@@ -11,10 +12,10 @@ namespace Xnope
         private IntVec3 a;
         private IntVec3 b;
         private IntVec3 c;
-        private IntVec3 centreInt;
         private CellLine lineAB;
         private CellLine lineAC;
         private CellLine lineBC;
+        private IntVec3 centreInt;
         private List<IntVec3> cellsInt;
 
         public IEnumerable<IntVec3> Cells
@@ -37,7 +38,7 @@ namespace Xnope
             }
         }
 
-        public IEnumerable<IntVec3> CellsInLineAB
+        public IEnumerable<IntVec3> EdgeAB
         {
             get
             {
@@ -45,7 +46,7 @@ namespace Xnope
             }
         }
 
-        public IEnumerable<IntVec3> CellsInLineAC
+        public IEnumerable<IntVec3> EdgeAC
         {
             get
             {
@@ -53,11 +54,19 @@ namespace Xnope
             }
         }
 
-        public IEnumerable<IntVec3> CellsInLineBC
+        public IEnumerable<IntVec3> EdgeBC
         {
             get
             {
                 return b.CellsInLineTo(c);
+            }
+        }
+
+        public IEnumerable<IntVec3> Edges
+        {
+            get
+            {
+                return EdgeAB.Concat(EdgeAC).Concat(EdgeBC);
             }
         }
 
@@ -94,15 +103,78 @@ namespace Xnope
             cellsInt = null;
         }
 
-        public static CellTriangle FromTarget(IntVec3 start, IntVec3 targ, float halfAngle, float sideLength)
+        public static CellTriangle FromTarget(IntVec3 start, IntVec3 targ, float halfAngle, float height)
         {
-            var dirVec = targ.ToVector3Shifted() - start.ToVector3Shifted();
+            var dirVec = (targ.ToVector3Shifted() - start.ToVector3Shifted()) * 100;
+            var sideLength = height / Mathf.Cos(halfAngle);
             dirVec = Vector3.ClampMagnitude(dirVec, sideLength);
 
             var b = dirVec.RotatedBy(halfAngle).ToIntVec3() + start;
             var c = dirVec.RotatedBy(-halfAngle).ToIntVec3() + start;
 
             return new CellTriangle(start, b, c);
+        }
+
+        public CellTriangle ClipInside(CellRect rect)
+        {
+            // Shift a
+
+            if (a.x < rect.minX)
+            {
+                a.x = rect.minX;
+            }
+            else if (a.x > rect.maxX)
+            {
+                a.x = rect.maxX;
+            }
+            if (a.z < rect.minZ)
+            {
+                a.z = rect.minZ;
+            }
+            else if (a.z > rect.maxZ)
+            {
+                a.z = rect.maxZ;
+            }
+
+            // Shift b
+
+            if (b.x < rect.minX)
+            {
+                b.x = rect.minX;
+            }
+            else if (b.x > rect.maxX)
+            {
+                b.x = rect.maxX;
+            }
+            if (b.z < rect.minZ)
+            {
+                b.z = rect.minZ;
+            }
+            else if (b.z > rect.maxZ)
+            {
+                b.z = rect.maxZ;
+            }
+
+            // Shift c
+
+            if (c.x < rect.minX)
+            {
+                c.x = rect.minX;
+            }
+            else if (c.x > rect.maxX)
+            {
+                c.x = rect.maxX;
+            }
+            if (c.z < rect.minZ)
+            {
+                c.z = rect.minZ;
+            }
+            else if (c.z > rect.maxZ)
+            {
+                c.z = rect.maxZ;
+            }
+
+            return this;
         }
 
         public bool Contains(IntVec3 cell)
