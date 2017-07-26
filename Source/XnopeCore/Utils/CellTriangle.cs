@@ -114,15 +114,16 @@ namespace Xnope
         public IEnumerable<IntVec3> RandomUniqueCells(int num, Predicate<IntVec3> validator = null)
         {
             var used = new HashSet<int>();
-            IntVec3 cell;
+            var iRange = new IntRange(0, CellsList.Count - 1);
 
-            int index = Rand.RangeInclusive(0, CellsList.Count - 1);
+            IntVec3 cell;
+            int index = iRange.RandomInRange;
             while (num > 0)
             {
                 int i = 0;
                 while (used.Contains(index) && i < CellsList.Count)
                 {
-                    index = Rand.RangeInclusive(0, CellsList.Count - 1);
+                    index = iRange.RandomInRange;
                     i++;
                 }
 

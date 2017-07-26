@@ -129,5 +129,25 @@ namespace Xnope
             }
         }
 
+        public static IEnumerable<T> RandomElements<T>(this IEnumerable<T> enumerable, int numElements)
+        {
+            if (!enumerable.Any())
+            {
+                yield break;
+            }
+
+            var arr = enumerable.ToList();
+
+            var iRange = new IntRange(0, arr.Count - 1);
+
+            int i = iRange.RandomInRange;
+            while (numElements > 0)
+            {
+                yield return arr[i];
+                i = iRange.RandomInRange;
+                numElements--;
+            }
+        }
+
     }
 }

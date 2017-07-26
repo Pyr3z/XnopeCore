@@ -567,6 +567,23 @@ namespace Xnope
             return consecutive ? numConsecutive : num;
         }
 
+        public static int CountObstructingCells(this IEnumerable<IntVec3> cells, Map map)
+        {
+            int num = 0;
+
+            foreach (var cell in cells)
+            {
+                if (!cell.InBounds(map)) continue;
+
+                if (!cell.CanBeSeenOverFast(map))
+                {
+                    num++;
+                }
+            }
+
+            return num;
+        }
+
         public static IntVec3 ClosestCellTo(this IEnumerable<IntVec3> cells, IntVec3 b, Map map)
         {
             var dist = float.MaxValue;
@@ -876,6 +893,18 @@ namespace Xnope
             {
                 if (cell.Standable(map))
                     return cell;
+            }
+
+            return IntVec3.Invalid;
+        }
+
+        public static IntVec3 OppositeVector(this IntVec3 cell, Map map = null)
+        {
+            var opp = new IntVec3(-cell.x, 0, -cell.z);
+
+            if (map == null || opp.InBounds(map))
+            {
+                return opp;
             }
 
             return IntVec3.Invalid;
