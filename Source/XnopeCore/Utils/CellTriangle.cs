@@ -93,24 +93,36 @@ namespace Xnope
 
         public CellTriangle(IntVec3 a, IntVec3 b, IntVec3 c)
         {
+            if (a == b || a == c || b == c)
+            {
+                throw new ArgumentException("[XnopeCore] Tried to construct a triangle with two equal cells. a=" + a + ", b=" + b + ", c=" + c);
+            }
+
             this.a = a;
             this.b = b;
             this.c = c;
+
+            if (b.IsClockwiseOfWRT(c, a))
+            {
+                this.b = c;
+                this.c = b;
+            }
+
             lineAB = CellLine.Between(a, b);
             lineAC = CellLine.Between(a, c);
             lineBC = CellLine.Between(b, c);
+
             centreInt = IntVec3.Invalid;
             cellsInt = null;
         }
 
         public static CellTriangle FromTarget(IntVec3 start, IntVec3 targ, float halfAngle, float height)
         {
-            var dirVec = (targ.ToVector3Shifted() - start.ToVector3Shifted()) * 100;
             var sideLength = height / Mathf.Cos(halfAngle);
-            dirVec = Vector3.ClampMagnitude(dirVec, sideLength);
+            var sideVec = (targ.ToVector3Shifted() - start.ToVector3Shifted()).normalized * sideLength;
 
-            var b = dirVec.RotatedBy(halfAngle).ToIntVec3() + start;
-            var c = dirVec.RotatedBy(-halfAngle).ToIntVec3() + start;
+            var b = sideVec.RotatedBy(halfAngle).ToIntVec3() + start;
+            var c = sideVec.RotatedBy(-halfAngle).ToIntVec3() + start;
 
             return new CellTriangle(start, b, c);
         }
@@ -172,6 +184,13 @@ namespace Xnope
             else if (c.z > rect.maxZ)
             {
                 c.z = rect.maxZ;
+            }
+
+            if (!cellsInt.NullOrEmpty())
+            {
+                cellsInt.Clear();
+                cellsInt = null;
+                centreInt = IntVec3.Invalid;
             }
 
             return this;

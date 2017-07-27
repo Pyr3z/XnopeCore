@@ -853,7 +853,7 @@ namespace Xnope
 
                 var terr = cel.GetTerrain(map);
 
-                if (terr.affordances.NullOrEmpty() || terr.avoidWander || terr.HasTag("Water"))
+                if (cel.Roofed(map) || terr.affordances.NullOrEmpty() || terr.avoidWander || terr.HasTag("Water"))
                 {
                     return false;
                 }
@@ -926,6 +926,14 @@ namespace Xnope
             }
 
             return false;
+        }
+
+        public static bool IsClockwiseOfWRT(this IntVec3 a, IntVec3 b, IntVec3 wrt)
+        {
+            var vecA = (a - wrt).ToVector3Shifted();
+            var vecB = (b - wrt).ToVector3Shifted();
+
+            return Vector3.Cross(vecA, vecB).y > 0;
         }
 
         /// <summary>
@@ -1200,7 +1208,7 @@ namespace Xnope
         {
             foreach (var cel in cell.CellsInLineTo(targ))
             {
-                if (amount-- == 0)
+                if (amount-- == 1)
                 {
                     if (map != null && !cel.InBounds(map))
                         Log.Error("[XnopeCore] Tried to translate " + cell + " toward " + targ + " by " + amount + ", which resulted in a cell out of bounds. Expect further errors.");
