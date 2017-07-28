@@ -5,6 +5,7 @@ using Verse;
 
 namespace Xnope.Patches
 {
+#pragma warning disable CS1591
     [HarmonyPatch(typeof(Faction), "GenerateNewLeader")]
     public static class Faction_GenerateNewLeader
     {
@@ -60,4 +61,5 @@ namespace Xnope.Patches
             return "";
         }
     }
+#pragma warning restore CS1591
 }

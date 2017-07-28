@@ -15,8 +15,31 @@ namespace Xnope
         private CellLine lineAB;
         private CellLine lineAC;
         private CellLine lineBC;
-        private IntVec3 centreInt;
         private List<IntVec3> cellsInt;
+
+        public IntVec3 A
+        {
+            get
+            {
+                return a;
+            }
+        }
+
+        public IntVec3 B
+        {
+            get
+            {
+                return b;
+            }
+        }
+
+        public IntVec3 C
+        {
+            get
+            {
+                return c;
+            }
+        }
 
         public IEnumerable<IntVec3> Cells
         {
@@ -82,12 +105,7 @@ namespace Xnope
         {
             get
             {
-                if (!centreInt.IsValid)
-                {
-                    centreInt = a.AverageWith(b, c);
-                }
-
-                return centreInt;
+                return a.AverageWith(b, c);
             }
         }
 
@@ -112,13 +130,12 @@ namespace Xnope
             lineAC = CellLine.Between(a, c);
             lineBC = CellLine.Between(b, c);
 
-            centreInt = IntVec3.Invalid;
             cellsInt = null;
         }
 
         public static CellTriangle FromTarget(IntVec3 start, IntVec3 targ, float halfAngle, float height)
         {
-            var sideLength = height / Mathf.Cos(halfAngle);
+            var sideLength = height / Mathf.Cos(halfAngle * Mathf.PI / 180f);
             var sideVec = (targ.ToVector3Shifted() - start.ToVector3Shifted()).normalized * sideLength;
 
             var b = sideVec.RotatedBy(halfAngle).ToIntVec3() + start;
@@ -186,11 +203,13 @@ namespace Xnope
                 c.z = rect.maxZ;
             }
 
+            lineAB = CellLine.Between(a, b);
+            lineAC = CellLine.Between(a, c);
+            lineBC = CellLine.Between(b, c);
+
             if (!cellsInt.NullOrEmpty())
             {
                 cellsInt.Clear();
-                cellsInt = null;
-                centreInt = IntVec3.Invalid;
             }
 
             return this;
@@ -265,6 +284,11 @@ namespace Xnope
             if (cellsInt == null)
             {
                 cellsInt = new List<IntVec3>();
+            }
+
+            if (!cellsInt.Any())
+            {
+                cellsInt.Clear();
 
                 var candidates = CellRect.FromLimits(
                     new IntVec3(Mathf.Min(a.x, b.x, c.x), 0, Mathf.Min(a.z, b.z, c.z)),

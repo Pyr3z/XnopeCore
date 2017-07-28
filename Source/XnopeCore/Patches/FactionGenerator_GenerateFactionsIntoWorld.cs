@@ -5,6 +5,7 @@ using Verse;
 
 namespace Xnope.Patches
 {
+#pragma warning disable CS1591
     [HarmonyPatch(typeof(FactionGenerator), "GenerateFactionsIntoWorld")]
     public static class FactionGenerator_GenerateFactionsIntoWorld
     {
@@ -36,4 +37,5 @@ namespace Xnope.Patches
             }
         }
     }
+#pragma warning restore CS1591
 }

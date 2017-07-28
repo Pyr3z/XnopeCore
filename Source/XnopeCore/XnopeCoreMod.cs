@@ -3,11 +3,10 @@ using Verse;
 using RimWorld;
 using Xnope.Defs;
 using System.Linq;
-using System.Collections.Generic;
 
 namespace Xnope
 {
-    #pragma warning disable CS1591
+#pragma warning disable CS1591
     [StaticConstructorOnStartup]
     public class XnopeCoreMod : ModBase
     {
@@ -81,5 +80,5 @@ namespace Xnope
             }
         }
     }
-    #pragma warning restore CS1591
+#pragma warning restore CS1591
 }

@@ -5,6 +5,7 @@ using Verse;
 
 namespace Xnope.Patches
 {
+#pragma warning disable CS1591
     [HarmonyPatch(typeof(PawnBioAndNameGenerator), "SetBackstoryInSlot")]
     public static class Patch_PawnBioAndNameGenerator_SetBackstoryInSlot
     {
@@ -28,4 +29,5 @@ namespace Xnope.Patches
             return true;
         }
     }
+#pragma warning restore CS1591
 }

@@ -6,6 +6,7 @@ using Verse;
 
 namespace Xnope.Defs
 {
+#pragma warning disable CS1591
     public class BackstoryDef : Def    // revised from CCL
     {
         #region XML Data
@@ -46,7 +47,7 @@ namespace Xnope.Defs
         {
             if (multiplicity < 1)
             {
-                Log.Warning("Config error in " + defName + ": multiplicity must be >= 1");
+                Log.Warning("[XnopeCore] Config error in " + defName + ": multiplicity must be >= 1");
             }
 
             bool flag= false;
@@ -59,9 +60,9 @@ namespace Xnope.Defs
             if (flag && Prefs.DevMode)
             {
                 if (multiplicity > 1)
-                    Log.Message("Added " + defName + " backstory with multiplicity " + multiplicity);
+                    Log.Message("[XnopeCore] Added " + defName + " backstory with multiplicity " + multiplicity);
                 else
-                    Log.Message("Added " + defName + " backstory");
+                    Log.Message("[XnopeCore] Added " + defName + " backstory");
             }
         }
 
@@ -74,7 +75,7 @@ namespace Xnope.Defs
 
             if (BackstoryDatabase.allBackstories.ContainsKey(this.UniqueSaveKey(counter)))
             {
-                Log.Warning(this.defName + " is duplicated. Skipping.");
+                Log.Warning("[XnopeCore] " + this.defName + " is duplicated. Skipping.");
                 return false;
             }
 
@@ -86,13 +87,13 @@ namespace Xnope.Defs
                 b.SetTitle(this.title);
             else
             {
-                Log.Error(this.defName + " requires a title in XML file. Skipping.");
+                Log.Error("[XnopeCore] " + this.defName + " requires a title in XML file. Skipping.");
                 return false;
             }
 
             if (spawnCategories.NullOrEmpty())
             {
-                Log.Error(this.defName + " requires a spawnCategory in XML file. Skipping.");
+                Log.Error("[XnopeCore] " + this.defName + " requires a spawnCategory in XML file. Skipping.");
                 return false;
             }
             else
@@ -237,4 +238,6 @@ namespace Xnope.Defs
         public string defName;
         public int degree;
     }
+
+#pragma warning restore CS1591
 }

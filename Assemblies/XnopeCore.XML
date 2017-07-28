@@ -158,6 +158,15 @@
             <param name="tag"></param>
             <returns></returns>
         </member>
+        <member name="M:Xnope.CellsUtil.IsClockwiseOfWRT(Verse.IntVec3,Verse.IntVec3,Verse.IntVec3)">
+            <summary>
+            Returns if a is clockwise of b in the X-Z plane, with respect to wrt.
+            </summary>
+            <param name="a"></param>
+            <param name="b"></param>
+            <param name="wrt"></param>
+            <returns></returns>
+        </member>
         <member name="M:Xnope.CellsUtil.NearestStandableCell(Verse.IntVec3,Verse.Map,System.Single)">
             <summary>
             Returns the nearest standable cell within the searchRadius, or IntVec3.Invalid if none exists.

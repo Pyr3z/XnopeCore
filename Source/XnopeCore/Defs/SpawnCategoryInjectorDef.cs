@@ -4,6 +4,7 @@ using Verse;
 
 namespace Xnope.Defs
 {
+#pragma warning disable CS1591
     public class SpawnCategoryInjectorDef : Def
     {
         public string newCategory;
@@ -14,4 +15,5 @@ namespace Xnope.Defs
 
         // Actually injected in XnopeCoreMod.DefsLoaded()
     }
+#pragma warning restore CS1591
 }

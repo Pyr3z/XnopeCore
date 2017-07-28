@@ -126,20 +126,30 @@ namespace Xnope
                 return cachedAverageColPos;
             }
 
-            var colonistThingsLocList = new List<IntVec3>();
+            var colonistThingsLocList = new List<LocalTargetInfo>();
 
             foreach (var pawn in map.mapPawns.FreeColonistsSpawned)
             {
-                colonistThingsLocList.Add(pawn.Position);
+                colonistThingsLocList.Add(pawn);
             }
-            foreach (var building in map.listerBuildings.allBuildingsColonist.Where(b => b.def == ThingDefOf.Wall || b is IAttackTarget))
+            foreach (var building in map.listerBuildings.allBuildingsColonist.Where(b => b.def == ThingDefOf.Wall || b.def == ThingDefOf.Door || b is IAttackTarget))
             {
-                colonistThingsLocList.Add(building.Position);
+                colonistThingsLocList.Add(building);
             }
 
-            colonistThingsLocList.Add(ApproxClosestColonistBuilding(map, map.Center, ThingDefOf.Door));
+            var ave = colonistThingsLocList.Average(delegate (LocalTargetInfo c)
+            {
+                if (c.Thing is Pawn)
+                {
+                    return 2;
+                }
+                else if (c.Thing.def == ThingDefOf.Sandbags)
+                {
+                    return 5;
+                }
 
-            var ave = colonistThingsLocList.Average();
+                return 1;
+            });
 
             Log.Message("[XnopeCore] Cached average colonist position: " + ave);
             cachedAverageColPos = ave;
@@ -773,6 +783,33 @@ namespace Xnope
             return float.MaxValue;
         }
 
+        public static float DistanceSquaredToNearestRoad(this IntVec3 cell, Map map, float searchRadius)
+        {
+            if (!map.roadInfo.roadEdgeTiles.Any())
+            {
+                return float.MaxValue;
+            }
+
+            var dist = float.MaxValue;
+
+            foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
+            {
+                if (!cel.InBounds(map)) continue;
+
+                if (cel.GetTerrain(map).HasTag("Road"))
+                {
+                    var tempDist = cell.DistanceToSquared(cel);
+
+                    if (tempDist < dist)
+                    {
+                        dist = tempDist;
+                    }
+                }
+            }
+
+            return dist;
+        }
+
         public static float DistanceToMapEdge(this IntVec3 cell, Map map)
         {
             if (!cell.InBounds(map))
@@ -928,12 +965,20 @@ namespace Xnope
             return false;
         }
 
+        /// <summary>
+        /// Returns if a is clockwise of b in the X-Z plane, with respect to wrt.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="wrt"></param>
+        /// <returns></returns>
         public static bool IsClockwiseOfWRT(this IntVec3 a, IntVec3 b, IntVec3 wrt)
         {
-            var vecA = (a - wrt).ToVector3Shifted();
-            var vecB = (b - wrt).ToVector3Shifted();
+            // Via cross product for the Y-value
+            var vecA = a - wrt;
+            var vecB = b - wrt;
 
-            return Vector3.Cross(vecA, vecB).y > 0;
+            return vecA.z * vecB.x - vecA.x * vecB.z < 0;
         }
 
         /// <summary>

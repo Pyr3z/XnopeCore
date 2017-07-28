@@ -4,6 +4,7 @@ using Verse;
 
 namespace Xnope
 {
+#pragma warning disable CS1591
     public class FactionExtension : DefModExtension
     {
         public FactionDef def;
@@ -20,6 +21,7 @@ namespace Xnope
         }
 
     }
+#pragma warning restore CS1591
 
 
 
