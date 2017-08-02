@@ -226,8 +226,7 @@ namespace Xnope
 
             if (!useOldVersion)
             {
-                // Fuck me. I hate Tynan and his genius bullshit.
-                // Copyright Verse.GenSight.PointsOnLineOfSight(). Fuck.
+                // Copyright Verse.GenSight.PointsOnLineOfSight(). It's called the Bresenham Algorithm.
                 bool sideOnEqual;
                 if (a.x == b.x)
                 {
@@ -245,39 +244,31 @@ namespace Xnope
                 int i = 1 + dx + dz;
                 int x_inc = (b.x <= a.x) ? -1 : 1;
                 int z_inc = (b.z <= a.z) ? -1 : 1;
-                int deviation = dx - dz;
-                dx *= 2; // Who the fuck knows why he did this.
+                int error = dx - dz;
+                dx *= 2;
                 dz *= 2;
 
-                IntVec3 cell = a;
+                var cell = a;
                 while (i > 1)
                 {
                     cell.x = x;
                     cell.z = z;
                     yield /* fucking */ return /* the god damn */ cell;
 
-                    if (deviation > 0 || (deviation == 0 && sideOnEqual))
+                    if (error > 0 || (error == 0 && sideOnEqual))
                     {
                         x += x_inc;
-                        deviation -= dz;
+                        error -= dz;
                     }
                     else
                     {
                         z += z_inc;
-                        deviation += dx;
+                        error += dx;
                     }
                     i--;
                 }
 
                 yield break;
-
-                // What kind of name is Tynan anyway?
-                // Sounds like a name for a pet rock.
-                // Or a Frenchish-Swedish tyrant.
-                // Except not because tyrants are usually geniuses.
-                // Or just rich.
-                // Either way.
-                // Tynan is both. Probably.
             }
 
             yield return a;
