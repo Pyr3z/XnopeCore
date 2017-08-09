@@ -559,6 +559,25 @@ namespace Xnope
             }
         }
 
+        public static int CountBadTerrainInRadius(this IntVec3 cell, Map map, float searchRadius)
+        {
+            var result = 0;
+
+            foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
+            {
+                if (!cel.InBounds(map)) continue;
+
+                var terr = cel.GetTerrain(map);
+
+                if (cel.Roofed(map) || terr.affordances.NullOrEmpty() || terr.avoidWander || terr.HasTag("Water"))
+                {
+                    result++;
+                }
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// Counts the number of mineable cells between a and be.
         /// </summary>
