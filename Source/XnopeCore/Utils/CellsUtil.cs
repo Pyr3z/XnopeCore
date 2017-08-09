@@ -678,9 +678,9 @@ namespace Xnope
             return result;
         }
 
-        public static float DistanceSquaredToNearestColonyBuilding(this IntVec3 cell, Map map, ThingDef ofDef = null, bool requireLineOfSight = false)
+        public static int DistanceSquaredToNearestColonyBuilding(this IntVec3 cell, Map map, ThingDef ofDef = null, bool requireLineOfSight = false)
         {
-            float dist = float.MaxValue;
+            var dist = int.MaxValue;
 
             if (!cell.InBounds(map))
             {
@@ -703,7 +703,7 @@ namespace Xnope
             {
                 if (!requireLineOfSight || GenSight.LineOfSight(cell, pos, map, true))
                 {
-                    float tempDist = cell.DistanceToSquared(pos);
+                    var tempDist = cell.DistanceToSquared(pos);
                     if (tempDist < dist)
                     {
                         dist = tempDist;
@@ -721,7 +721,7 @@ namespace Xnope
         /// <param name="map"></param>
         /// <param name="searchRadius"></param>
         /// <returns></returns>
-        public static float DistanceSquaredToNearestMineable(this IntVec3 cell, Map map, float searchRadius)
+        public static int DistanceSquaredToNearestMineable(this IntVec3 cell, Map map, float searchRadius)
         {
             foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
             {
@@ -734,7 +734,7 @@ namespace Xnope
                 }
             }
 
-            return float.MaxValue;
+            return int.MaxValue;
         }
 
         /// <summary>
@@ -745,7 +745,7 @@ namespace Xnope
         /// <param name="searchRadius"></param>
         /// <param name="mineable">The closest mineable cell.</param>
         /// <returns></returns>
-        public static float DistanceSquaredToNearestMineable(this IntVec3 cell, Map map, float searchRadius, out IntVec3 mineable)
+        public static int DistanceSquaredToNearestMineable(this IntVec3 cell, Map map, float searchRadius, out IntVec3 mineable)
         {
             foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
             {
@@ -760,7 +760,7 @@ namespace Xnope
             }
 
             mineable = IntVec3.Invalid;
-            return float.MaxValue;
+            return int.MaxValue;
         }
 
         /// <summary>
@@ -774,7 +774,7 @@ namespace Xnope
         /// <param name="searchRadius"></param>
         /// <param name="mineable">The closest mineable cell, with a Thing instead of an IntVec3.</param>
         /// <returns></returns>
-        public static float DistanceSquaredToNearestMineable(this LocalTargetInfo cell, Map map, float searchRadius, out LocalTargetInfo mineable)
+        public static int DistanceSquaredToNearestMineable(this LocalTargetInfo cell, Map map, float searchRadius, out LocalTargetInfo mineable)
         {
             IntVec3 cellvec = cell.Cell;
             foreach (var cel in GenRadial.RadialCellsAround(cellvec, searchRadius, true))
@@ -790,17 +790,15 @@ namespace Xnope
             }
 
             mineable = IntVec3.Invalid;
-            return float.MaxValue;
+            return int.MaxValue;
         }
 
-        public static float DistanceSquaredToNearestRoad(this IntVec3 cell, Map map, float searchRadius)
+        public static int DistanceSquaredToNearestRoad(this IntVec3 cell, Map map, float searchRadius)
         {
             if (!map.roadInfo.roadEdgeTiles.Any())
             {
-                return float.MaxValue;
+                return int.MaxValue;
             }
-
-            var dist = float.MaxValue;
 
             foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
             {
@@ -808,24 +806,19 @@ namespace Xnope
 
                 if (cel.GetTerrain(map).HasTag("Road"))
                 {
-                    var tempDist = cell.DistanceToSquared(cel);
-
-                    if (tempDist < dist)
-                    {
-                        dist = tempDist;
-                    }
+                    return cell.DistanceToSquared(cel);
                 }
             }
 
-            return dist;
+            return int.MaxValue;
         }
 
-        public static float DistanceToMapEdge(this IntVec3 cell, Map map)
+        public static int DistanceToMapEdge(this IntVec3 cell, Map map)
         {
             if (!cell.InBounds(map))
             {
                 Log.Error("[XnopeCore] Tried to get distance from " + cell + " to map edge, but it is out of bounds.");
-                return float.MaxValue;
+                return int.MaxValue;
             }
 
             var centre = map.Center;
