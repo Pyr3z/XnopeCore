@@ -175,16 +175,13 @@ namespace Xnope
             var centre = map.Center;
             var targ = CellRect.WholeMap(map).RandomCell;
             var halfAngle = Rand.Range(20, 80);
-            var magn = 20;
+            var magn = 40;
 
-            var tri = CellTriangle.FromTarget(centre, targ, halfAngle, magn);
+            var tri = CellTriangle.FromTarget(centre, targ, halfAngle, magn).ClipInside(CellRect.WholeMap(map));
 
-            foreach (var cell in tri)
-            {
-                var thing = ThingMaker.MakeThing(ThingDefOf.Snowman);
+            Log.Warning("[XnopeCore] Debug CellTriangle: A=" + tri.A + ", B=" + tri.B + ", C=" + tri.C + ", SlopeAB=" + tri.LineAB.Slope + ", ZInterceptAB=" + tri.LineAB.ZIntercept + ", SlopeAC=" + tri.LineAC.Slope + ", ZInterceptAC=" + tri.LineAC.ZIntercept +  ", SlopeBC=" + tri.LineBC.Slope + ", ZInterceptBC=" + tri.LineBC.ZIntercept);
 
-                GenSpawn.Spawn(thing, cell, map);
-            }
+            tri.DebugFlashDraw();
         }
     }
 }

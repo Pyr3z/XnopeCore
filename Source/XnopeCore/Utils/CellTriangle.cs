@@ -41,6 +41,30 @@ namespace Xnope
             }
         }
 
+        public CellLine LineAB
+        {
+            get
+            {
+                return lineAB;
+            }
+        }
+
+        public CellLine LineAC
+        {
+            get
+            {
+                return lineAC;
+            }
+        }
+
+        public CellLine LineBC
+        {
+            get
+            {
+                return lineBC;
+            }
+        }
+
         public IEnumerable<IntVec3> Cells
         {
             get
@@ -135,6 +159,8 @@ namespace Xnope
 
         public static CellTriangle FromTarget(IntVec3 start, IntVec3 targ, float halfAngle, float height)
         {
+            if (halfAngle > 85) halfAngle = 85;
+
             var sideLength = height / Mathf.Cos(halfAngle * Mathf.PI / 180f);
             var sideVec = (targ.ToVector3Shifted() - start.ToVector3Shifted()).normalized * sideLength;
 
@@ -276,6 +302,20 @@ namespace Xnope
 
             cell = IntVec3.Invalid;
             return false;
+        }
+
+
+        public void DebugFlashDraw()
+        {
+            var drawer = Find.VisibleMap.debugDrawer;
+            drawer.FlashLine(a, b);
+            drawer.FlashLine(a, c);
+            drawer.FlashLine(b, c);
+
+            foreach (var cell in CellsList)
+            {
+                drawer.FlashCell(cell);
+            }
         }
 
 

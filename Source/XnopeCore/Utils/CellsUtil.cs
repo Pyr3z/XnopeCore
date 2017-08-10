@@ -183,25 +183,21 @@ namespace Xnope
         /// <returns></returns>
         public static bool CellIsBetween(CellLine lineA, CellLine lineB, IntVec3 c)
         {
-            bool aPos = lineA.Slope > 0;
-            bool bPos = lineB.Slope > 0;
-            bool oppositeSigns = aPos != bPos;
-            bool sameQuad = !oppositeSigns && lineA.Slope > lineB.Slope;
-            bool oppositeQuads = !oppositeSigns && lineA.Slope < lineB.Slope;
+            float a = lineA.Slope;
+            float b = lineB.Slope;
+            bool aPos = a > 0;
+            bool bPos = b > 0;
+            bool leftA = lineA.CellIsLeft(c);
+            bool leftB = lineB.CellIsLeft(c);
 
-            if (sameQuad || (bPos && !aPos))
+            if (leftA == leftB) // tt or ff
             {
-                return lineA.CellIsLeft(c) == lineB.CellIsLeft(c);
+                return (aPos == bPos) == a < b;
             }
-
-            if (oppositeQuads || (aPos && !bPos))
+            else // tf or ft
             {
-                return lineA.CellIsLeft(c) != lineB.CellIsLeft(c);
+                return (aPos == bPos) == a > b;
             }
-
-            // I may have figured this out on my own, but I still have no fucking clue why it works.
-
-            return lineA.CellIsAbove(c) != lineB.CellIsAbove(c);
         }
 
         /// <summary>
