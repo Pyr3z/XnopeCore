@@ -24,6 +24,11 @@ namespace Xnope
         }
 
 
+        public static bool AnyRoads(this Map map)
+        {
+            return map.roadInfo.roadEdgeTiles.Any();
+        }
+
         /// <summary>
         /// Averages an IEnumerable of cells, with an optional multiplicity function that
         /// determines how much weight a specific kind of cell should have on the average.
@@ -1373,7 +1378,7 @@ namespace Xnope
             return roadNear.IsValid || roadFar.IsValid;
         }
 
-        public static bool TryFindNearestRoadCell(this IntVec3 cell, Map map, float searchRadius, out IntVec3 roadCell)
+        public static bool TryFindNearestRoadCell(this IntVec3 cell, Map map, float searchRadius, out IntVec3 roadCell, Predicate<IntVec3> validator = null)
         {
             if (!map.roadInfo.roadEdgeTiles.Any())
             {
@@ -1381,8 +1386,27 @@ namespace Xnope
                 return false;
             }
 
-            var dist = float.MaxValue;
-            var tempCell = IntVec3.Invalid;
+            foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
+            {
+                if (!cel.InBounds(map) || (validator != null && !validator(cel))) continue;
+
+                if (cel.GetTerrain(map).HasTag("Road"))
+                {
+                    roadCell = cel;
+                    return true;
+                }
+            }
+
+            roadCell = IntVec3.Invalid;
+            return false;
+        }
+
+        public static IEnumerable<IntVec3> TryFindNearestRoadCells(this IntVec3 cell, Map map, float searchRadius)
+        {
+            if (!map.AnyRoads())
+            {
+                yield break;
+            }
 
             foreach (var cel in GenRadial.RadialCellsAround(cell, searchRadius, true))
             {
@@ -1390,18 +1414,9 @@ namespace Xnope
 
                 if (cel.GetTerrain(map).HasTag("Road"))
                 {
-                    var tempDist = cell.DistanceToSquared(cel);
-
-                    if (tempDist < dist)
-                    {
-                        dist = tempDist;
-                        tempCell = cel;
-                    }
+                    yield return cel;
                 }
             }
-
-            roadCell = tempCell;
-            return roadCell.IsValid;
         }
 
         public static bool TryFindNearestCellToRoad(this IEnumerable<IntVec3> cells, Map map, float searchRadius, out IntVec3 nearCell)
