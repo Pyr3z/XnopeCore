@@ -149,6 +149,31 @@ namespace Xnope
             }
         }
 
+        public static bool TryMaxByWeight<T>(this IEnumerable<T> enumerable, Func<T, float> weightSelector, out T result)
+        {
+            using (IEnumerator<T> enumerator = enumerable.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                {
+                    result = default(T);
+                    return false;
+                }
 
+                result = enumerator.Current;
+                var weight = weightSelector(result);
+
+                while (enumerator.MoveNext())
+                {
+                    var tempResult = enumerator.Current;
+                    var tempWeight = weightSelector(result);
+                    if (tempWeight > weight)
+                    {
+                        result = tempResult;
+                        weight = tempWeight;
+                    }
+                }
+            }
+            return true;
+        }
     }
 }
