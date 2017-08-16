@@ -125,7 +125,7 @@ namespace Xnope
             }
         }
 
-        public IntVec3 Centre
+        public IntVec3 Centroid
         {
             get
             {
@@ -305,7 +305,7 @@ namespace Xnope
         }
 
 
-        public void DebugFlashDraw()
+        public void DebugFlashDraw(float colorPct = 0f)
         {
             var drawer = Find.VisibleMap.debugDrawer;
             drawer.FlashLine(a, b);
@@ -314,7 +314,7 @@ namespace Xnope
 
             foreach (var cell in CellsList)
             {
-                drawer.FlashCell(cell);
+                drawer.FlashCell(cell, colorPct);
             }
         }
 
@@ -328,8 +328,6 @@ namespace Xnope
 
             if (!cellsInt.Any())
             {
-                cellsInt.Clear();
-
                 var candidates = CellRect.FromLimits(
                     new IntVec3(Mathf.Min(a.x, b.x, c.x), 0, Mathf.Min(a.z, b.z, c.z)),
                     new IntVec3(Mathf.Max(a.x, b.x, c.x), 0, Mathf.Max(a.z, b.z, c.z))

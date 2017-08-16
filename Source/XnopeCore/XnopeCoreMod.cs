@@ -35,6 +35,8 @@ namespace Xnope
             //Debug.TestCellTriangleDraw(map);
             //Debug.TestCellTriangleDraw(map);
             //Debug.TestCellTriangleDraw(map);
+            //Debug.TestCellTriangleDraw45Case(map);
+            //Debug.TestCellTriangleDraw90Case(map);
         }
 
 

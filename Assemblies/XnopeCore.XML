@@ -53,14 +53,6 @@
             <param name="c"></param>
             <returns></returns>
         </member>
-        <member name="M:Xnope.CellsUtil.CellIsLeft(Verse.CellLine,Verse.IntVec3)">
-            <summary>
-            Similar to CellLine.CellIsAbove(), tells if a cell is left of a line. This accounts for whether or not a slope is negative.
-            </summary>
-            <param name="line"></param>
-            <param name="c"></param>
-            <returns></returns>
-        </member>
         <member name="M:Xnope.CellsUtil.CellsInLineTo(Verse.IntVec3,Verse.IntVec3,System.Boolean)">
             <summary>
             Yields the cells in a line from a to b.

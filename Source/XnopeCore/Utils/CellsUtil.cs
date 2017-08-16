@@ -185,30 +185,17 @@ namespace Xnope
         {
             float a = lineA.Slope;
             float b = lineB.Slope;
-            bool aPos = a > 0;
-            bool bPos = b > 0;
-            bool leftA = lineA.CellIsLeft(c);
-            bool leftB = lineB.CellIsLeft(c);
+            bool aboveA = lineA.CellIsAbove(c);
+            bool aboveB = lineB.CellIsAbove(c);
 
-            if (leftA == leftB) // tt or ff
+            if (aboveA == aboveB)
             {
-                return (aPos == bPos) == a < b;
+                return a < b;
             }
-            else // tf or ft
+            else
             {
-                return (aPos == bPos) == a > b;
+                return a > b;
             }
-        }
-
-        /// <summary>
-        /// Similar to CellLine.CellIsAbove(), tells if a cell is left of a line. This accounts for whether or not a slope is negative.
-        /// </summary>
-        /// <param name="line"></param>
-        /// <param name="c"></param>
-        /// <returns></returns>
-        public static bool CellIsLeft(this CellLine line, IntVec3 c)
-        {
-            return c.x < (c.z - line.ZIntercept) / line.Slope;
         }
 
         /// <summary>

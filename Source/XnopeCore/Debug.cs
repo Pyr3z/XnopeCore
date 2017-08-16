@@ -183,5 +183,85 @@ namespace Xnope
 
             tri.DebugFlashDraw();
         }
+
+        public static void TestCellTriangleDraw45Case(Map map)
+        {
+            var centre = map.Center;
+            var magn = 40;
+            var halfAngle = 15f;
+            var targ = IntVec3.Invalid;
+
+            for (int i = 0; i < 8; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        targ = centre + IntVec3.North + IntVec3.East;
+                        break;
+                    case 1:
+                        targ = centre + IntVec3.North;
+                        break;
+                    case 2:
+                        targ = centre + IntVec3.North + IntVec3.West;
+                        break;
+                    case 3:
+                        targ = centre + IntVec3.South + IntVec3.East;
+                        break;
+                    case 4:
+                        targ = centre + IntVec3.South;
+                        break;
+                    case 5:
+                        targ = centre + IntVec3.South + IntVec3.West;
+                        break;
+                    case 6:
+                        targ = centre + IntVec3.East;
+                        break;
+                    case 7:
+                        targ = centre + IntVec3.West;
+                        break;
+                }
+
+                var tri = CellTriangle.FromTarget(centre, targ, halfAngle, magn).ClipInside(CellRect.WholeMap(map));
+
+                Log.Warning("[XnopeCore] Debug CellTriangle: A=" + tri.A + ", B=" + tri.B + ", C=" + tri.C + ", SlopeAB=" + tri.LineAB.Slope + ", ZInterceptAB=" + tri.LineAB.ZIntercept + ", SlopeAC=" + tri.LineAC.Slope + ", ZInterceptAC=" + tri.LineAC.ZIntercept + ", SlopeBC=" + tri.LineBC.Slope + ", ZInterceptBC=" + tri.LineBC.ZIntercept);
+
+                tri.DebugFlashDraw(1f / Rand.Range(0f, 1.0f));
+            }
+
+        }
+
+        public static void TestCellTriangleDraw90Case(Map map)
+        {
+            var centre = map.Center;
+            var magn = 40;
+            var halfAngle = 55f;
+            var targ = IntVec3.Invalid;
+
+            for (int i = 0; i < 4; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        targ = centre + IntVec3.North + IntVec3.East;
+                        break;
+                    case 1:
+                        targ = centre + IntVec3.North + IntVec3.West;
+                        break;
+                    case 2:
+                        targ = centre + IntVec3.South + IntVec3.West;
+                        break;
+                    case 3:
+                        targ = centre + IntVec3.South + IntVec3.East;
+                        break;
+                }
+
+                var tri = CellTriangle.FromTarget(centre, targ, halfAngle, magn).ClipInside(CellRect.WholeMap(map));
+
+                Log.Warning("[XnopeCore] Debug CellTriangle: A=" + tri.A + ", B=" + tri.B + ", C=" + tri.C + ", SlopeAB=" + tri.LineAB.Slope + ", ZInterceptAB=" + tri.LineAB.ZIntercept + ", SlopeAC=" + tri.LineAC.Slope + ", ZInterceptAC=" + tri.LineAC.ZIntercept + ", SlopeBC=" + tri.LineBC.Slope + ", ZInterceptBC=" + tri.LineBC.ZIntercept);
+
+                tri.DebugFlashDraw(1f / Rand.Range(0f, 1.0f));
+            }
+
+        }
     }
 }
