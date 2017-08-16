@@ -60,7 +60,7 @@ namespace Xnope
             var enu = enumerable.GetEnumerator();
 
             int i = 0;
-            while (i <= upperBound && enu.MoveNext())
+            while (i < upperBound && enu.MoveNext())
             {
                 if (i >= lowerBound)
                 {
