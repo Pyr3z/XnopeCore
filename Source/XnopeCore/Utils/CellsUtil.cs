@@ -214,7 +214,7 @@ namespace Xnope
 
             if (!useOldVersion)
             {
-                // Copyright Verse.GenSight.PointsOnLineOfSight(). It's called the Bresenham Algorithm.
+                // Bresenham Algorithm.
                 bool sideOnEqual;
                 if (a.x == b.x)
                 {
@@ -255,6 +255,8 @@ namespace Xnope
                     }
                     i--;
                 }
+
+                yield return b;
 
                 yield break;
             }

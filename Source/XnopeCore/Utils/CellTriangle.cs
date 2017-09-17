@@ -146,8 +146,10 @@ namespace Xnope
 
             if (b.IsClockwiseOfWRT(c, a))
             {
+                var temp = b;
                 this.b = c;
-                this.c = b;
+                this.c = temp;
+
             }
 
             lineAB = CellLine.Between(a, b);
